@@ -11,9 +11,6 @@ const connectDB = async () => {
     });
 
     console.log("Mongoose Connected ...");
-    // Friends.createCollection().then(function(collection){
-    //   console.log("Friends Collection is created!");
-    // });
   } catch (err) {
     console.error(err.message);
     process.exit(1);

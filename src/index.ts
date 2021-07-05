@@ -8,7 +8,7 @@ connectDB();
 app.use(express.json()); 
 
 // Define Routes
-app.use("/friends", require("./api/friends")); 
+app.use("/users", require("./api/users")); 
 
 // error handler
 app.use(function (err, req, res, next) {

@@ -7,7 +7,7 @@ const UsersSchema = new mongoose.Schema({
     required: true
   },
   delperiod: {
-    type: Date,
+    type: Number,
     required: true
   }
 });
