@@ -3,17 +3,18 @@ import jwt from "jsonwebtoken";
 import config from "../config";
 import User from "../models/Users";
 import { check, validationResult } from "express-validator";
+import auth from "../middleware/auth";
 
 const router = Router();
 
 /**
- *  @route POST api/users/enroll
+ *  @route POST api/users
  *  @desc Create a user
  *  @access Public
  */
 
 router.post(
-  "/enroll",
+  "/",
   [check("device_id", "id is required").not().isEmpty()],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -21,26 +22,48 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    console.log(req.body);
     const device_id = req.body.device_id;
-    let ispush = req.body.ispush;
-    let delperiod = req.body.delperiod;
-
     try {
       let user = await User.findOne({ device_id });
       if (user) {
-        res.status(200).json({
-          errors: [{ msg: "이미 존재하는 사용자" }],
+        const payload = {
+          user: {
+            id: user.id,
+          },
+        };
+        jwt.sign(
+          payload,
+          config.jwtSecret,
+          { expiresIn: 36000 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token });
+          }
+        );
+      } else {
+        let ispush = true;
+        let delperiod = 3;
+        user = new User({
+          device_id,
+          ispush,
+          delperiod,
         });
+        await user.save();
+        const payload = {
+          user: {
+            id: user.id,
+          },
+        };
+        jwt.sign(
+          payload,
+          config.jwtSecret,
+          { expiresIn: 36000 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token });
+          }
+        );
       }
-
-      user = new User({
-        device_id,
-        ispush,
-        delperiod,
-      });
-      await user.save();
-      res.status(201).send("사용자 생성 완료");
     } catch (err) {
       console.error(err.message);
       res.status(500).send("서버 오류");
@@ -49,29 +72,13 @@ router.post(
 );
 
 /**
- *  @route GET api/users
- *  @desc search all users
- *  @access Public
- */
-
-router.get("/", async (req: Request, res: Response) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).send("서버 오류");
-  }
-});
-
-/**
  *  @route GET api/users/:id
  *  @desc Get user by ID
  *  @access Public
  */
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/", auth, async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.body.user.id);
 
     if (!user) {
       return res.status(404).json({ msg: "특정 사용자 조회 실패" });
@@ -91,20 +98,18 @@ router.get("/:id", async (req: Request, res: Response) => {
  *  @desc PATCH user by ID
  *  @access Public
  */
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/", auth, async (req: Request, res: Response) => {
   try {
     if ("ispush" in req.body) {
-      console.log(req.params.id);
-      console.log(req.body["ispush"]);
-      console.log(req.body.ispush);
-      // User.updateOne({ _id: req.params.id }, { ispush: req.body.ispush });
-      await User.findByIdAndUpdate(req.params.id, { ispush: req.body.ispush });
+      await User.findByIdAndUpdate(req.body.user.id, {
+        ispush: req.body.ispush,
+      });
     } else {
-      await User.findByIdAndUpdate(req.params.id, {
-        ispush: req.body.delpeiod,
+      await User.findByIdAndUpdate(req.body.user.id, {
+        delperiod: req.body.delperiod,
       });
     }
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.body.user.id);
     console.log(user);
     res.status(200).send("성공적으로 수정되었습니다.");
   } catch (error) {

@@ -1,14 +1,16 @@
-import express from "express"; 
-const app = express(); 
+import express from "express";
+const app = express();
 import connectDB from "./Loaders/db";
 
 // Connect Database
 connectDB();
 
-app.use(express.json()); 
+app.use(express.json());
 
 // Define Routes
-app.use("/users", require("./api/users")); 
+app.use("/users", require("./api/users"));
+app.use("/categories", require("./api/categories"));
+app.use("/posts", require("./api/posts"));
 
 // error handler
 app.use(function (err, req, res, next) {

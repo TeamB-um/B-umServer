@@ -4,25 +4,25 @@ import { IPosts } from "../interfaces/IPosts";
 const PostsSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   text: {
     type: String,
-    required: true
+    required: true,
   },
-  created_date : {
+  created_date: {
     type: Date,
-    required: true
+    required: true,
+    default: Date.now(),
   },
   category_id: {
     type: mongoose.SchemaTypes.ObjectId,
-    ref:"Categories",
+    ref: "Categories",
   },
   user_id: {
     type: mongoose.SchemaTypes.ObjectId,
-    ref:"Users"
-  }
-
+    ref: "Users",
+  },
 });
 
 export default mongoose.model<IPosts & mongoose.Document>("Posts", PostsSchema);
