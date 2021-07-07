@@ -4,21 +4,24 @@ import { ICategories } from "../interfaces/ICategories";
 const CategoriesSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   count: {
     type: Number,
-    required: true
+    default: 0,
+    required: true,
   },
-  index : {
-    type: Date,
-    required: true
+  index: {
+    type: Number,
+    required: true,
   },
   user_id: {
     type: mongoose.SchemaTypes.ObjectId,
-    ref:"Users"
-  }
-
+    ref: "Users",
+  },
 });
 
-export default mongoose.model<ICategories & mongoose.Document>("Categories", CategoriesSchema);
+export default mongoose.model<ICategories & mongoose.Document>(
+  "Categories",
+  CategoriesSchema
+);
