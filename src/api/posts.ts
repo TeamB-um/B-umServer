@@ -1,19 +1,19 @@
-import express, { Router, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import config from "../config";
-import User from "../models/Users";
+import { Router, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
+
+import User from "../models/Users";
+import Post from "../models/Posts";
 
 const router = Router();
 
 /**
- *  @route POST api/users/enroll
- *  @desc Create a user
+ *  @route POST api/posts
+ *  @desc Create a post
  *  @access Public
  */
 
 router.post(
-  "/enroll",
+  "/
   [check("device_id", "id is required").not().isEmpty()],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
