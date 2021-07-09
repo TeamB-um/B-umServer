@@ -1,5 +1,5 @@
 export interface ICheers {
-    id? : String;
+    id : String;
     name : String;
     img : String;
 }

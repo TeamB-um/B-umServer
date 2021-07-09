@@ -1,5 +1,4 @@
 import express, { Router, Request, Response } from "express";
-import Cheer from "../models/Cheers";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
 import Cheers from "../models/Cheers";
@@ -23,12 +22,12 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, context, img } = req.body;
+    const { id, context, img } = req.body;
 
     try {
 
       const newCheers = new Cheers({
-        name,
+        id,
         context,
         img
       });
