@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { IRewards } from "../interfaces/IRewards";
 
 const RewardsSchema = new mongoose.Schema({
-  name: {
+  id: {
     type: String,
     required: true,
   },
