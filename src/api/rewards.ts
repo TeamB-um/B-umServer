@@ -1,5 +1,5 @@
 import express, { Router, Request, Response } from "express";
-import Reward from "../models/Rewards";
+import User from "../models/Users";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
 import Rewards from "../models/Rewards";
@@ -23,17 +23,18 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, created_date, sentence, author, category_id} = req.body;
+    const { id, created_date, sentence, author, category_id } = req.body;
 
     try {
-      // const user = await Reward.findById(req.body.user.id);
+      const user = await User.findById(req.body.user.id);
 
       const newRewards = new Rewards({
-        name,
+        id,
         created_date,
         sentence,
         author,
-        category_id
+        category_id,
+        user_id: user.id
       });
 
       const reward = await newRewards.save();
