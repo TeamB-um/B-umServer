@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { IRewards } from "../interfaces/IRewards";
 
 const RewardsSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   created_date: {
     type: Date,
     required: true
