@@ -18,10 +18,6 @@ const RewardsSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  context : {
-    type: String,
-    required: true
-  },
   category_id: {
     type: mongoose.SchemaTypes.ObjectId,
     ref:"Categories",
