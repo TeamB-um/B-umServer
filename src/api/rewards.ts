@@ -23,7 +23,11 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
+<<<<<<< HEAD
     const { id, created_date, sentence, author, category_id } = req.body;
+=======
+    const { id, created_date, sentence, author, category_id} = req.body;
+>>>>>>> 1412a29de629327f89fad43478f0337f37b9a267
 
     try {
       const user = await User.findById(req.body.user.id);

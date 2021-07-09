@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IRewards {
-  _id?: String;
+  id: String;
   created_date: Date;
   sentence: String;
   author: String;
