@@ -3,6 +3,7 @@ import User from "../models/Users";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
 import Rewards from "../models/Rewards";
+import Categories from "../models/Categories";
 
 const router = Router();
 
@@ -15,7 +16,11 @@ const router = Router();
 router.post(
   "/",
   auth,
-  [check("name", "name is required").not().isEmpty()],
+  [
+    check("sentence", "sentence is required").not().isEmpty(),
+    check("category_id", "category_id is required").not().isEmpty(),
+    check("user_id", "user_id is required").not().isEmpty(),
+  ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
 
@@ -23,21 +28,20 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-<<<<<<< HEAD
-    const { id, created_date, sentence, author, category_id } = req.body;
-=======
-    const { id, created_date, sentence, author, category_id} = req.body;
->>>>>>> 1412a29de629327f89fad43478f0337f37b9a267
+    const { id, created_date, sentence, author, category_id, user_id} = req.body;
 
     try {
       const user = await User.findById(req.body.user.id);
+      const category = await Categories.findOne({
+        name: req.body.category_name,
+      });
 
       const newRewards = new Rewards({
         id,
         created_date,
         sentence,
         author,
-        category_id,
+        category_id: category.id,
         user_id: user.id
       });
 
