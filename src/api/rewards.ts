@@ -55,4 +55,24 @@ router.post(
   }
 );
 
+router.get(
+  "/",
+  async (req: Request, res: Response) => {
+
+    try{
+        const rewards = await Rewards.find();
+
+        if (!rewards){
+            return res.status(204).json({message : "리워드가 없음"});
+        }
+
+        res.json({reward : rewards, message : "리워드 조회 성공"});
+
+    } catch (error){
+        console.error(error.message);
+        res.status(500).send("서버 오류");
+    }
+  }
+);
+
 module.exports = router;
