@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { ICheers } from "../interfaces/ICheers";
 
 const CheersSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true,
+  },
   context: {
     type: String,
     required: true
