@@ -4,6 +4,7 @@ import config from "../config";
 import User from "../models/Users";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
+import Categories from "../models/Categories";
 
 const router = Router();
 
@@ -49,6 +50,75 @@ router.post(
           delperiod,
         });
         await user.save();
+
+        function getCurrentDate() {
+          var date = new Date();
+          var year = date.getFullYear();
+          var month = date.getMonth();
+          var today = date.getDate();
+          var hours = date.getHours();
+          var minutes = date.getMinutes();
+          var seconds = date.getSeconds();
+          var milliseconds = date.getMilliseconds();
+          return new Date(
+            Date.UTC(year, month, today, hours, minutes, seconds, milliseconds)
+          );
+        }
+
+        const newCategory0 = new Categories({
+          name: "취업",
+          user_id: user.id,
+          index: 0,
+          count: 0,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/0-0.png`,
+          created_date: getCurrentDate(),
+        });
+        await newCategory0.save();
+        const newCategory1 = new Categories({
+          name: "학업",
+          user_id: user.id,
+          index: 1,
+          count: 0,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/1-0.png`,
+          created_date: getCurrentDate(),
+        });
+        await newCategory1.save();
+        const newCategory2 = new Categories({
+          name: "인간관계",
+          user_id: user.id,
+          index: 2,
+          count: 0,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/2-0.png`,
+          created_date: getCurrentDate(),
+        });
+        await newCategory2.save();
+        const newCategory3 = new Categories({
+          name: "건강",
+          user_id: user.id,
+          index: 3,
+          count: 0,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/3-0.png`,
+          created_date: getCurrentDate(),
+        });
+        await newCategory3.save();
+        const newCategory4 = new Categories({
+          name: "금전",
+          user_id: user.id,
+          index: 4,
+          count: 0,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/4-0.png`,
+          created_date: getCurrentDate(),
+        });
+        await newCategory4.save();
+        const newCategory5 = new Categories({
+          name: "개인",
+          user_id: user.id,
+          index: 5,
+          count: 0,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/5-0.png`,
+          created_date: getCurrentDate(),
+        });
+        await newCategory5.save();
         const payload = {
           user: {
             id: user.id,

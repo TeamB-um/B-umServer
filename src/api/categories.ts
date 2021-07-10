@@ -1,8 +1,10 @@
 import express, { Router, Request, Response } from "express";
 import User from "../models/Users";
+import Posts from "../models/Posts";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
 import Categories from "../models/Categories";
+import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "node:constants";
 
 const router = Router();
 
@@ -22,13 +24,44 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     const name = req.body.name;
+    const checkname = await Categories.findOne({ name });
+    if (checkname) {
+      res.status(400).send("중복된 이름 존재");
+    }
     try {
+      let newindex = -1;
+      for (var i = 0; i < 8; i++) {
+        console.log(i);
+        let ifcategory = await Categories.findOne({ index: i });
+        if (!ifcategory) {
+          newindex = i;
+          break;
+        }
+      }
+      if (newindex == -1) {
+        res.status(400).send("카테고리 8개 초과");
+      }
       const user = await User.findById(req.body.user.id);
+      function getCurrentDate() {
+        var date = new Date();
+        var year = date.getFullYear();
+        var month = date.getMonth();
+        var today = date.getDate();
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        var milliseconds = date.getMilliseconds();
+        return new Date(
+          Date.UTC(year, month, today, hours, minutes, seconds, milliseconds)
+        );
+      }
       const newCategory = new Categories({
         name,
         user_id: user.id,
-        index: 0,
+        index: newindex,
         count: 0,
+        img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${newindex}-0.png`,
+        created_date: getCurrentDate(),
       });
       const category = await newCategory.save();
       res.json(category);
@@ -38,5 +71,40 @@ router.post(
     }
   }
 );
+
+router.get("/", auth, async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  try {
+    const categories = await Categories.find();
+    res.json(categories);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("서버 오류");
+  }
+});
+
+router.delete("/", auth, async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const category_id = req.body.category_id;
+  try {
+    await Posts.deleteMany({
+      category_id: category_id,
+    });
+    await Categories.deleteOne({
+      _id: category_id,
+    });
+    const categories = await Categories.find();
+    res.json(categories);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("서버 오류");
+  }
+});
 
 module.exports = router;

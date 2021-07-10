@@ -35,9 +35,24 @@ router.post(
     const category_name = req.body.category_name;
     try {
       const user = await User.findById(req.body.user.id);
-      const category = await Categories.findOne({
+      const categoryObject = await Categories.findOne({
         name: req.body.category_name,
       });
+      let categorycount = categoryObject.count;
+      let categoryindex = categoryObject.index;
+      categorycount = Number(categorycount) + 1;
+      console.log(categorycount);
+      const category = await Categories.findOneAndUpdate(
+        {
+          name: category_name,
+        },
+        {
+          $set: {
+            count: categorycount,
+            img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${categoryindex}-${categorycount}.png`,
+          },
+        }
+      );
 
       function getCurrentDate() {
         var date = new Date();
@@ -65,7 +80,7 @@ router.post(
       res.json(post);
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("서버 오류");
+      res.status(500).json({ error: "서버 오류" });
     }
   }
 );
@@ -86,25 +101,50 @@ router.get("/", auth, async (req: Request, res: Response) => {
   try {
     if (datetoggle) {
       if (category) {
-        const posts = await Posts.find().where("category_id").equals(category)
-        .where("created_date").gte(start_date)..where("created_date").lte(end_date)
-        res.json(posts);
+        const posts = await Posts.find()
+          .where("category_id")
+          .equals(category)
+          .where("created_date")
+          .gte(start_date)
+          .where("created_date")
+          .lte(end_date);
+        if (posts.length != 0) {
+          res.json(posts);
+        } else {
+          res.json({ error: "해당 필터 결과가 없습니다." });
+        }
       } else {
-        const posts = await Posts.find().where("created_date").gte(start_date)..where("created_date").lte(end_date)
-        res.json(posts);
+        const posts = await Posts.find()
+          .where("created_date")
+          .gte(start_date)
+          .where("created_date")
+          .lte(end_date);
+        if (posts.length != 0) {
+          res.json(posts);
+        } else {
+          res.json({ error: "해당 필터 결과가 없습니다." });
+        }
       }
     } else {
       if (category) {
-        const posts = await Posts.find().where("created_date").gte(start_date)..where("created_date").lte(end_date)
-        res.json(posts);
+        const posts = await Posts.find().where("category_id").equals(category);
+        if (posts.length != 0) {
+          res.json(posts);
+        } else {
+          res.json({ error: "해당 필터 결과가 없습니다." });
+        }
       } else {
         const posts = await Posts.find();
-        res.json(posts);
+        if (posts.length != 0) {
+          res.json(posts);
+        } else {
+          res.json({ error: "해당 필터 결과가 없습니다." });
+        }
       }
     }
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("서버 오류");
+    res.status(500).json({ error: "해당 필터 결과가 없습니다.or 서버 오류" });
   }
 });
 
@@ -117,7 +157,7 @@ router.get("/statistics", auth, async (req: Request, res: Response) => {
   try {
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("서버 오류");
+    res.status(500).json({ error: "해당 필터 결과가 없습니다.or 서버 오류" });
   }
 });
 
@@ -131,31 +171,28 @@ router.delete("/", auth, async (req: Request, res: Response) => {
     await Posts.deleteMany({
       _id: { $in: posts_id },
     });
-
-    const post = await Posts.find();
-    res.json(post);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("서버 오류");
-  }
-});
-
-router.delete("/:id", auth, async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  const category_id = req.params.id;
-  try {
-    await Posts.deleteMany({
-      category_id: category_id,
+    const categoryObject = await Categories.findOne({
+      name: req.body.category_name,
     });
-
+    let categorycount = categoryObject.count;
+    let categoryindex = categoryObject.index;
+    categorycount = Number(categorycount) - 1;
+    const category = await Categories.findOneAndUpdate(
+      {
+        name: req.body.category_name,
+      },
+      {
+        $set: {
+          count: categorycount,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${categoryindex}-${categorycount}.png`,
+        },
+      }
+    );
     const post = await Posts.find();
     res.json(post);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("서버 오류");
+    res.status(500).json({ error: "서버 오류" });
   }
 });
 
