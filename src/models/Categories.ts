@@ -8,7 +8,6 @@ const CategoriesSchema = new mongoose.Schema({
   },
   count: {
     type: Number,
-    default: 0,
     required: true,
   },
   index: {
@@ -18,6 +17,14 @@ const CategoriesSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: "Users",
+  },
+  img: {
+    type: String,
+    requied: true,
+  },
+  created_date: {
+    type: Date,
+    requied: true,
   },
 });
 
