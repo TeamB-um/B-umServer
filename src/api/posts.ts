@@ -80,7 +80,7 @@ router.post(
       res.json(post);
     } catch (err) {
       console.error(err.message);
-      res.status(500).json({ error: "서버 오류" });
+      res.status(500).json({ msg: "서버 오류" });
     }
   }
 );
@@ -111,7 +111,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         if (posts.length != 0) {
           res.json(posts);
         } else {
-          res.json({ error: "해당 필터 결과가 없습니다." });
+          res.json({ msg: "해당 필터 결과가 없습니다." });
         }
       } else {
         const posts = await Posts.find()
@@ -122,7 +122,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         if (posts.length != 0) {
           res.json(posts);
         } else {
-          res.json({ error: "해당 필터 결과가 없습니다." });
+          res.json({ msg: "해당 필터 결과가 없습니다." });
         }
       }
     } else {
@@ -131,20 +131,20 @@ router.get("/", auth, async (req: Request, res: Response) => {
         if (posts.length != 0) {
           res.json(posts);
         } else {
-          res.json({ error: "해당 필터 결과가 없습니다." });
+          res.json({ msg: "해당 필터 결과가 없습니다." });
         }
       } else {
         const posts = await Posts.find();
         if (posts.length != 0) {
           res.json(posts);
         } else {
-          res.json({ error: "해당 필터 결과가 없습니다." });
+          res.json({ msg: "해당 필터 결과가 없습니다." });
         }
       }
     }
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "해당 필터 결과가 없습니다.or 서버 오류" });
+    res.status(500).json({ msg: "서버 오류" });
   }
 });
 
@@ -153,11 +153,10 @@ router.get("/statistics", auth, async (req: Request, res: Response) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
   try {
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "해당 필터 결과가 없습니다.or 서버 오류" });
+    res.status(500).json({ msg: "서버 오류" });
   }
 });
 
@@ -192,7 +191,7 @@ router.delete("/", auth, async (req: Request, res: Response) => {
     res.json(post);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "서버 오류" });
+    res.status(500).json({ msg: "서버 오류" });
   }
 });
 

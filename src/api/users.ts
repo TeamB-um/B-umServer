@@ -136,13 +136,13 @@ router.post(
       }
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("서버 오류");
+      res.status(500).json({ msg: "서버 오류" });
     }
   }
 );
 
 /**
- *  @route GET api/users/:id
+ *  @route GET api/users
  *  @desc Get user by ID
  *  @access Public
  */
@@ -151,40 +151,40 @@ router.get("/", auth, async (req: Request, res: Response) => {
     const user = await User.findById(req.body.user.id);
 
     if (!user) {
-      return res.status(404).json({ msg: "특정 사용자 조회 실패" });
+      return res.status(404).json({ msg: "사용자 조회 실패" });
     }
     res.json(user);
   } catch (error) {
     console.error(error.message);
     if (error.kind === "ObjectId") {
-      return res.status(404).json({ msg: "특정 사용자 조회 실패" });
+      return res.status(404).json({ msg: "사용자 조회 실패" });
     }
-    res.status(500).send("서버 오류");
+    res.status(500).json({ msg: "서버 오류" });
   }
 });
 
 /**
- *  @route PATCH api/users/:id
+ *  @route PATCH api/users
  *  @desc PATCH user by ID
  *  @access Public
  */
 router.patch("/", auth, async (req: Request, res: Response) => {
   try {
-    if ("ispush" in req.body) {
+    if (req.body.ispush != null) {
       await User.findByIdAndUpdate(req.body.user.id, {
         ispush: req.body.ispush,
       });
-    } else {
+    }
+    if (req.body.delperiod != null) {
       await User.findByIdAndUpdate(req.body.user.id, {
         delperiod: req.body.delperiod,
       });
     }
     const user = await User.findById(req.body.user.id);
-    console.log(user);
-    res.status(200).send("성공적으로 수정되었습니다.");
+    res.json(user);
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("서버 오류");
+    res.status(500).json({ msg: "서버 오류" });
   }
 });
 

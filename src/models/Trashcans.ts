@@ -4,24 +4,27 @@ import { ITrashcans } from "../interfaces/ITrashcans";
 const TrashcansSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   text: {
     type: String,
-    required: true
+    required: true,
   },
   user_id: {
     type: mongoose.SchemaTypes.ObjectId,
-    ref:"Users",
+    ref: "Users",
   },
   created_date: {
     type: Date,
-    required: true
+    required: true,
   },
   delpriod: {
-    type: Date,
-    required: true
-  }
+    type: Number,
+    required: true,
+  },
 });
 
-export default mongoose.model<ITrashcans & mongoose.Document>("Trashcans", TrashcansSchema);
+export default mongoose.model<ITrashcans & mongoose.Document>(
+  "Trashcans",
+  TrashcansSchema
+);

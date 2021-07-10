@@ -26,7 +26,7 @@ router.post(
     const name = req.body.name;
     const checkname = await Categories.findOne({ name });
     if (checkname) {
-      res.status(400).send("중복된 이름 존재");
+      res.status(500).json({ msg: "중복된 이름 유지" });
     }
     try {
       let newindex = -1;
@@ -39,7 +39,7 @@ router.post(
         }
       }
       if (newindex == -1) {
-        res.status(400).send("카테고리 8개 초과");
+        res.status(500).json({ msg: "카테고리 8개 초과" });
       }
       const user = await User.findById(req.body.user.id);
       function getCurrentDate() {
@@ -67,7 +67,7 @@ router.post(
       res.json(category);
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("서버 오류");
+      res.status(500).json({ msg: "서버 오류" });
     }
   }
 );
@@ -82,7 +82,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
     res.json(categories);
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("서버 오류");
+    res.status(500).json({ msg: "서버 오류" });
   }
 });
 
@@ -103,7 +103,7 @@ router.delete("/", auth, async (req: Request, res: Response) => {
     res.json(categories);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("서버 오류");
+    res.status(500).json({ msg: "서버 오류" });
   }
 });
 
