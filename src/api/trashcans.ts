@@ -36,7 +36,7 @@ router.get(
 /**
  *  @route GET api/trashcans/:id
  *  @desc Get trash by ID
- *  @access Public
+ *  @access Private
  */
  router.get("/", auth, async (req: Request, res: Response) => {
   try {
@@ -57,6 +57,22 @@ router.get(
     res.status(500).send("서버 오류");
   }
 });
+
+/**
+ *  @route DELETE api/trashcans
+ *  @desc Delete trash by Expire Date
+ *  @access Public
+ */
+
+
+
+
+/**
+ *  @route POST api/trashcans
+ *  @desc Create a trash
+ *  @access Public
+ */
+
 
 
 module.exports = router;
