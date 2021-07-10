@@ -42,4 +42,26 @@ router.post(
   }
 );
 
+router.get(
+  "/",
+  async (req: Request, res: Response) => {
+
+    try{
+        const cheers = await Cheers.find();
+
+        if (!cheers){
+            return res.status(204).json({message : "응원 메세지가 없음."});
+        }
+
+        res.json({cheer : cheers, message : "응원 메세지 조회 성공"});
+
+    } catch (error){
+        console.error(error.message);
+        res.status(500).send("Server Error");
+    }
+
+  }
+);
+
+
 module.exports = router;
