@@ -2,6 +2,7 @@ import express, { Router, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
 import Trashcans from "../models/Trashcans";
+import Users from "../models/Users";
 
 const router = Router();
 
@@ -72,6 +73,36 @@ router.get(
  *  @desc Create a trash
  *  @access Public
  */
+
+ router.post(
+  "/",
+  auth,
+  async (req: Request, res: Response) => {
+
+    const user = await Users.findById(req.body.user.id);
+    const title = req.body.title;
+    const text = req.body.text;
+    const user_id = req.body.user_id;
+
+    let created_date = new Date();
+    const delperiod = user.delperiod;
+
+    try {
+      const newTrash = new Trashcans({
+        title,
+        text,
+        user_id,
+        created_date,
+        delperiod
+      });
+      const trash = await newTrash.save();
+      res.json(trash);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("서버 오류");
+    }
+  }
+);
 
 
 

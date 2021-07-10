@@ -24,13 +24,8 @@ const TrashcansSchema = new mongoose.Schema({
   },
   delpriod: {
     type: Number,
-<<<<<<< HEAD
-    required: true
-  }
-=======
     required: true,
   },
->>>>>>> f4fc821cbaaea4bdad8db053a23121d7bb582140
 });
 
 export default mongoose.model<ITrashcans & mongoose.Document>(
