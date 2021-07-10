@@ -4,28 +4,31 @@ import { IRewards } from "../interfaces/IRewards";
 const RewardsSchema = new mongoose.Schema({
   created_date: {
     type: Date,
-    required: true
+    required: true,
   },
   sentence: {
     type: String,
-    required: true
+    required: true,
   },
-  author : {
+  author: {
     type: String,
-    required: true
+    required: true,
   },
-  context : {
+  context: {
     type: String,
-    required: true
+    required: true,
   },
   category_id: {
     type: mongoose.SchemaTypes.ObjectId,
-    ref:"Categories",
+    ref: "Categories",
   },
   user_id: {
     type: Array,
-    required: true
-  }
+    required: true,
+  },
 });
 
-export default mongoose.model<IRewards & mongoose.Document>("Rewards", RewardsSchema);
+export default mongoose.model<IRewards & mongoose.Document>(
+  "Rewards",
+  RewardsSchema
+);
