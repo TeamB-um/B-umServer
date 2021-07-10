@@ -107,4 +107,24 @@ router.delete("/", auth, async (req: Request, res: Response) => {
   }
 });
 
+/**
+ *  @route PATCH api/categories
+ *  @desc PATCH categories by ID
+ *  @access Public
+ */
+ router.patch("/", auth, async (req: Request, res: Response) => {
+  try {
+    if (req.body.name != null) {
+      await Categories.findByIdAndUpdate(req.body.user.id, {
+        name: req.body.name,
+      });
+    }
+    const category = await Categories.findById(req.body.user.id);
+    res.json(category);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: "서버 오류" });
+  }
+});
+
 module.exports = router;
