@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
 import User from "../models/Users";
-import Posts from "../models/Posts";
+import Posts from "../models/Writings";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
 import Categories from "../models/Categories";
