@@ -35,6 +35,7 @@ router.post(
       const category = await Categories.findOne({
         name: req.body.category_id,
       });
+      const seq = await Rewards.count() + 1;
 
       const newRewards = new Rewards({
         id,
@@ -42,7 +43,8 @@ router.post(
         sentence,
         author,
         category_id: category.id,
-        user_id: [user.id]
+        user_id: [user.id],
+        seq
       });
 
       const reward = await newRewards.save();
@@ -75,8 +77,5 @@ router.get(
   }
 );
 
-<<<<<<< HEAD
-=======
 
->>>>>>> cfa712c1a7baf47ddafc58a43db662d2d43e1e63
 module.exports = router;

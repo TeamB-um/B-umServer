@@ -7,4 +7,5 @@ export interface IRewards {
   author: String;
   category_id: mongoose.Types.ObjectId;
   user_id: Array<1000>;
+  seq: Number;
 }
