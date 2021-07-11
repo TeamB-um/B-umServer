@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { IPosts } from "../interfaces/IPosts";
+// const moment = require("moment-timezone");
+// const dateSeoul = moment.tz(Date.now(), "Asia/Seoul");
 
 const PostsSchema = new mongoose.Schema({
   title: {
@@ -13,7 +15,6 @@ const PostsSchema = new mongoose.Schema({
   created_date: {
     type: Date,
     required: true,
-    default: Date.now(),
   },
   category_id: {
     type: mongoose.SchemaTypes.ObjectId,

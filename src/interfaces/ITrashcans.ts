@@ -6,5 +6,6 @@ export interface ITrashcans {
   text: String;
   category_id: mongoose.Types.ObjectId;
   user_id: mongoose.Types.ObjectId;
+  delperiod: Number;
   created_date: Date;
 }
