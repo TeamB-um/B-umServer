@@ -10,7 +10,7 @@ app.use(express.json());
 // Define Routes
 app.use("/users", require("./api/users"));
 app.use("/categories", require("./api/categories"));
-app.use("/posts", require("./api/posts"));
+app.use("/writings", require("./api/writings"));
 
 // error handler
 app.use(function (err, req, res, next) {
@@ -23,13 +23,16 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
+
 app // [5]
   .listen(5000, () => {
     console.log(`
     ################################################
     🛡️  Server listening on port: 5000 🛡️
     ################################################
-  `);
+  `
+  );
+
   })
   .on("error", (err) => {
     console.error(err);
