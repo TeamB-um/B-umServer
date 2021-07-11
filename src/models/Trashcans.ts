@@ -1,17 +1,5 @@
 import mongoose from "mongoose";
 import { ITrashcans } from "../interfaces/ITrashcans";
-import { IUsers } from "../interfaces/IUsers";
-
-
-const TrashcanExpireSchema = new mongoose.Schema({
-  delperiod: {
-    type: Number,
-    required: true
-  }
-})
-
-
-
 
 const TrashcansSchema = new mongoose.Schema({
   title: {
