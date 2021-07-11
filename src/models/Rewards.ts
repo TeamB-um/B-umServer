@@ -26,6 +26,10 @@ const RewardsSchema = new mongoose.Schema({
     type: Array,
     required: true,
   },
+  seq: {
+    type: Number,
+    required: true,
+  }
 });
 
 export default mongoose.model<IRewards & mongoose.Document>(
