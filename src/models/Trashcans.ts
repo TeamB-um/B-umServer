@@ -10,6 +10,10 @@ const TrashcansSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  category_id: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref:"Categories",
+  },
   user_id: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: "Users",
