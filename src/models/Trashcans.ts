@@ -18,14 +18,15 @@ const TrashcansSchema = new mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     ref: "Users",
   },
-  created_date: {
-    type: Date,
-    required: true,
-  },
-  delpriod: {
+  delperiod: {
     type: Number,
     required: true,
   },
+  created_date: {
+    type: Date,
+    //created_date가 될 시 1분 후 해당 문서 삭제
+    expires: 60
+  }
 });
 
 export default mongoose.model<ITrashcans & mongoose.Document>(

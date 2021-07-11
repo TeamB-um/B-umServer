@@ -33,8 +33,9 @@ router.post(
     try {
       const user = await User.findById(req.body.user.id);
       const category = await Categories.findOne({
-        name: req.body.category_name,
+        name: req.body.category_id,
       });
+      const seq = await Rewards.count() + 1;
 
       const newRewards = new Rewards({
         id,
@@ -42,7 +43,8 @@ router.post(
         sentence,
         author,
         category_id: category.id,
-        user_id: user.id
+        user_id: [user.id],
+        seq
       });
 
       const reward = await newRewards.save();
@@ -51,6 +53,26 @@ router.post(
     } catch (err) {
       console.error(err.message);
       res.status(500).send("서버 오류");
+    }
+  }
+);
+
+router.get(
+  "/",
+  async (req: Request, res: Response) => {
+
+    try{
+        const rewards = await Rewards.find();
+
+        if (!rewards){
+            return res.status(204).json({message : "리워드가 없음"});
+        }
+
+        res.json({reward : rewards, message : "리워드 조회 성공"});
+
+    } catch (error){
+        console.error(error.message);
+        res.status(500).send("서버 오류");
     }
   }
 );
