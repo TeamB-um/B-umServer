@@ -59,14 +59,13 @@ router.get(
   }
 });
 
-/**
- *  @route DELETE api/trashcans
- *  @desc Delete trash by Expire Date
- *  @access Public
- */
 
-
-
+//trash 생성 날짜와 삭제 날짜를 연산해서 반환하는 함수
+function addDays(date, days) {
+  const clone = new Date(date);
+  clone.setDate(date.getDate() + days)
+  return clone;
+}
 
 /**
  *  @route POST api/trashcans
@@ -90,17 +89,23 @@ router.get(
     const text = req.body.text;
     const user_id = req.body.user_id;
 
+    //현재 날짜를 생성날짜로 정하고
     let created_date = new Date();
+    //user model에서 유통기한을 받아온 뒤
     const delperiod = user.delperiod;
+    //두 날짜를 더해서 삭제 예정 날짜를 연산
+    //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
+    created_date = addDays(created_date, delperiod);
 
     try {
       const newTrash = new Trashcans({
         title,
         text,
         user_id,
-        created_date,
-        delperiod
+        delperiod,
+        created_date
       });
+
       const trash = await newTrash.save();
       res.json(trash);
     } catch (err) {
