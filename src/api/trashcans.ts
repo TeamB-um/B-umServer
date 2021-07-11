@@ -79,6 +79,12 @@ router.get(
   auth,
   async (req: Request, res: Response) => {
 
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const user = await Users.findById(req.body.user.id);
     const title = req.body.title;
     const text = req.body.text;

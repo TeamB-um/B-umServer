@@ -33,7 +33,7 @@ router.post(
     try {
       const user = await User.findById(req.body.user.id);
       const category = await Categories.findOne({
-        name: req.body.category_name,
+        name: req.body.category_id,
       });
 
       const newRewards = new Rewards({
@@ -42,7 +42,7 @@ router.post(
         sentence,
         author,
         category_id: category.id,
-        user_id: user.id
+        user_id: [user.id]
       });
 
       const reward = await newRewards.save();
