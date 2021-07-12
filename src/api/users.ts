@@ -21,7 +21,7 @@ router.post(
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
     const device_id = req.body.device_id;
     try {
@@ -38,7 +38,7 @@ router.post(
           { expiresIn: 360000 },
           (err, token) => {
             if (err) throw err;
-            res.status(200).json({ "success" : "true",token });
+            res.status(200).json({ success: true, token });
           }
         );
       } else {
@@ -130,13 +130,13 @@ router.post(
           { expiresIn: 360000 },
           (err, token) => {
             if (err) throw err;
-            res.status(201).json({ "success" : "true",token });
+            res.status(201).json({ success: true, token });
           }
         );
       }
     } catch (err) {
       console.error(err.message);
-      res.status(500).json({ msg: "서버 오류" });
+      res.status(500).json({ success: false, msg: "서버 오류" });
     }
   }
 );
@@ -148,18 +148,20 @@ router.post(
  */
 router.get("/", auth, async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.body.user.id).select("-device_id -_id -__v");
+    const user = await User.findById(req.body.user.id).select(
+      "-device_id -_id -__v"
+    );
 
     if (!user) {
-      return res.status(404).json({ "success" : "false", msg: "사용자 조회 실패" });
+      return res.status(404).json({ success: false, msg: "사용자 조회 실패" });
     }
-    res.status(200).json({ "success" : "true", user});
+    res.status(200).json({ success: true, user });
   } catch (error) {
     console.error(error.message);
     if (error.kind === "ObjectId") {
-      return res.status(404).json({  "success" : "false",msg: "사용자 조회 실패" });
+      return res.status(404).json({ success: false, msg: "사용자 조회 실패" });
     }
-    res.status(500).json({  "success" : "false",msg: "서버 오류" });
+    res.status(500).json({ success: false, msg: "서버 오류" });
   }
 });
 
@@ -171,28 +173,32 @@ router.get("/", auth, async (req: Request, res: Response) => {
 router.patch("/", auth, async (req: Request, res: Response) => {
   const ispush = req.body.ispush;
   const delperiod = req.body.delperiod;
-  if(typeof ispush != "boolean" || typeof delperiod != "number"||delperiod >=8)
-  {
-    res.status(400).json({"success" : "false", msg: "조건에 맞지 않는 요청" });
+  if (
+    typeof ispush != "boolean" ||
+    typeof delperiod != "number" ||
+    delperiod >= 8
+  ) {
+    res.status(400).json({ success: false, msg: "조건에 맞지 않는 요청" });
   }
   try {
-    if (req.body.ispush!=null) {
+    if (req.body.ispush != null) {
       await User.findByIdAndUpdate(req.body.user.id, {
         ispush: req.body.ispush,
       });
     }
-    if (req.body.delperiod!=null) {
+    if (req.body.delperiod != null) {
       await User.findByIdAndUpdate(req.body.user.id, {
         delperiod: req.body.delperiod,
       });
     }
-    const user = await User.findById(req.body.user.id).select("-device_id -_id -__v");
-    res.status(200).json({"success" : "true",user});
+    const user = await User.findById(req.body.user.id).select(
+      "-device_id -_id -__v"
+    );
+    res.status(200).json({ success: true, user });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({"success" : "false", msg: "서버 오류" });
+    res.status(500).json({ success: false, msg: "서버 오류" });
   }
-  }
-);
+});
 
 module.exports = router;

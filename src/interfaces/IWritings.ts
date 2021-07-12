@@ -3,16 +3,16 @@ import mongoose from "mongoose";
 export interface IWritings {
   title: String;
   text: String;
-  user_id : mongoose.Types.ObjectId;
-  category_id: mongoose.Types.ObjectId,
-  category: Object,
-  created_date : Date;
+  user_id: mongoose.Types.ObjectId;
+  category_id: mongoose.Types.ObjectId;
+  category: Object;
+  created_date: Date;
 }
 
 export interface InputWritingsDTO {
-  _id : String;
+  _id: String;
   title: String;
   text: String;
-  category : Object,
-  created_date : Date
+  category: Object;
+  created_date: Date;
 }

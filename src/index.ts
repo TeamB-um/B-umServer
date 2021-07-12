@@ -11,6 +11,8 @@ app.use(express.json());
 app.use("/users", require("./api/users"));
 app.use("/categories", require("./api/categories"));
 app.use("/writings", require("./api/writings"));
+app.use("/trashcans", require("./api/trashcans"));
+app.use("/rewards", require("./api/rewards"));
 
 // error handler
 app.use(function (err, req, res, next) {
@@ -23,16 +25,13 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-
 app // [5]
   .listen(5000, () => {
     console.log(`
     ################################################
     🛡️  Server listening on port: 5000 🛡️
     ################################################
-  `
-  );
-
+  `);
   })
   .on("error", (err) => {
     console.error(err);

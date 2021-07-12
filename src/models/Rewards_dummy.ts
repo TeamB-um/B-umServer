@@ -1,11 +1,7 @@
 import mongoose from "mongoose";
 import { IRewards } from "../interfaces/IRewards";
 
-const RewardsSchema = new mongoose.Schema({
-  created_date: {
-    type: Date,
-    required: true,
-  },
+const RewardDummySchema = new mongoose.Schema({
   sentence: {
     type: String,
     required: true,
@@ -18,17 +14,13 @@ const RewardsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  user_id: {
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: "Users",
-  },
-  index: {
+  seq: {
     type: Number,
     required: true,
   },
 });
 
 export default mongoose.model<IRewards & mongoose.Document>(
-  "Rewards",
-  RewardsSchema
+  "RewardDummy",
+  RewardDummySchema
 );

@@ -6,5 +6,5 @@ export interface ICategories {
   count: Number;
   index: Number;
   img: String;
-  created_date : Date
+  created_date: Date;
 }
