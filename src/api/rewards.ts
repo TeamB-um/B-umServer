@@ -1,9 +1,22 @@
 import express, { Router, Request, Response } from "express";
-import User from "../models/Users";
 import { check, validationResult } from "express-validator";
 import auth from "../middleware/auth";
 import Rewards from "../models/Rewards";
-import Categories from "../models/Categories";
+import RewardDummy from "../models/Rewards_dummy";
+
+function getCurrentDate() {
+  var date = new Date();
+  var year = date.getFullYear();
+  var month = date.getMonth();
+  var today = date.getDate();
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var seconds = date.getSeconds();
+  var milliseconds = date.getMilliseconds();
+  return new Date(
+    Date.UTC(year, month, today, hours, minutes, seconds, milliseconds)
+  );
+}
 
 const router = Router();
 
@@ -18,64 +31,70 @@ router.post(
   auth,
   [
     check("sentence", "sentence is required").not().isEmpty(),
-    check("category_id", "category_id is required").not().isEmpty(),
-    check("user_id", "user_id is required").not().isEmpty(),
+    check("context", "context is required").not().isEmpty(),
+    check("author", "author is required").not().isEmpty(),
   ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { id, created_date, sentence, author, category_id, user_id} = req.body;
+    const { sentence, author, context } = req.body;
 
     try {
-      const user = await User.findById(req.body.user.id);
-      const category = await Categories.findOne({
-        name: req.body.category_id,
-      });
-      const seq = await Rewards.count() + 1;
+      const seq = (await RewardDummy.count()) + 1;
 
-      const newRewards = new Rewards({
-        id,
-        created_date,
+      const newRewards = new RewardDummy({
         sentence,
         author,
-        category_id: category.id,
-        user_id: [user.id],
-        seq
+        context,
+        seq,
       });
 
       const reward = await newRewards.save();
-      res.json(reward);
-
+      res.json({ success: true, reward });
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("서버 오류");
+      res.status(500).json({ success: false, msg: "서버 오류" });
     }
   }
 );
 
-router.get(
-  "/",
-  async (req: Request, res: Response) => {
+router.get("/dummy", async (req: Request, res: Response) => {
+  try {
+    const rewards = await RewardDummy.find();
 
-    try{
-        const rewards = await Rewards.find();
-
-        if (!rewards){
-            return res.status(204).json({message : "리워드가 없음"});
-        }
-
-        res.json({reward : rewards, message : "리워드 조회 성공"});
-
-    } catch (error){
-        console.error(error.message);
-        res.status(500).send("서버 오류");
+    if (!rewards) {
+      return res.status(404).json({ success: false, message: "리워드가 없음" });
     }
-  }
-);
 
+    res.json({ success: true, reward: rewards, message: "리워드 조회 성공" });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ success: false, msg: "서버 오류" });
+  }
+});
+
+router.get("/", auth, async (req: Request, res: Response) => {
+  try {
+    const rewards = await Rewards.find().select("-__v");
+
+    if (!rewards) {
+      return res.status(404).json({ success: false, message: "리워드가 없음" });
+    }
+
+    res.json({ success: true, reward: rewards, message: "리워드 조회 성공" });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ success: false, msg: "서버 오류" });
+  }
+});
+
+<<<<<<< HEAD
 
 module.exports = router;
+=======
+module.exports = router;
+>>>>>>> bbb01b5e9cb99ad089079e3e355704d91dc16cdd
