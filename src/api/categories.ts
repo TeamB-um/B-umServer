@@ -77,7 +77,7 @@ router.post(
             img: category.img,
             created_date: category.created_date,
           };
-          res.json({ success: true, categoryresult });
+          res.json({ success: true, data: categoryresult });
         }
       } catch (err) {
         console.error(err.message);
@@ -96,7 +96,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
     const categories = await Categories.find().select(
       "-user_id -index -count -__v"
     );
-    res.json({ success: true, categories });
+    res.status(200).json({ success: true, data: categories });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });
@@ -140,7 +140,7 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
     const category = await Categories.findById(req.params.category_id).select(
       "_id name img"
     );
-    res.status(200).json({ success: true, category });
+    res.status(200).json({ success: true, data: category });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });

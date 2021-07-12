@@ -115,7 +115,7 @@ router.post(
           category: writing.category,
           created_date: writing.created_date,
         };
-        res.status(201).json({ success: true, writingresult });
+        res.status(201).json({ success: true, data: writingresult });
       } catch (err) {
         console.error(err.message);
         res.status(500).json({ success: false, msg: "서버 오류" });
@@ -150,7 +150,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
       };
       res
         .status(200)
-        .json({ success: true, msg: "글 1개 조회 완료", writingresult });
+        .json({ success: true, msg: "글 1개 조회 완료", data: writingresult });
     } else {
       if (start_date) {
         if (req.query.category_ids) {
@@ -161,7 +161,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
           });
           console.log(writings);
           if (writings.length != 0) {
-            res.status(200).json({ success: true, writings });
+            res.status(200).json({ success: true, data: writings });
           } else {
             res
               .status(404)
@@ -173,7 +173,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
             created_date: { $gte: Date_start_date, $lte: Date_end_date },
           });
           if (writings.length != 0) {
-            res.status(200).json({ success: true, writings });
+            res.status(200).json({ success: true, data: writings });
           } else {
             res
               .status(404)
@@ -196,7 +196,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         } else {
           const writings = await Writing.find({ user_id: { $eq: user_id } });
           if (writings.length != 0) {
-            res.status(200).json({ success: true, writings });
+            res.status(200).json({ success: true, data: writings });
           } else {
             res
               .status(404)
@@ -322,7 +322,7 @@ router.get(
       });
 
       await newReward.save();
-      res.status(200).json({ success: true, reward });
+      res.status(200).json({ success: true, data: reward });
     } catch (err) {
       console.error(err.message);
       res.status(500).json({ success: false, msg: "서버 오류" });
