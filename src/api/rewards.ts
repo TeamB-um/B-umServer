@@ -54,7 +54,7 @@ router.post(
       });
 
       const reward = await newRewards.save();
-      res.json({ success: true, reward });
+      res.status(201).json({ success: true, data: reward });
     } catch (err) {
       console.error(err.message);
       res.status(500).json({ success: false, msg: "서버 오류" });
@@ -70,7 +70,7 @@ router.get("/dummy", async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "리워드가 없음" });
     }
 
-    res.json({ success: true, reward: rewards, message: "리워드 조회 성공" });
+    res.status(200).json({ success: true, data: rewards, message: "리워드 조회 성공" });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });
@@ -85,16 +85,11 @@ router.get("/", auth, async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "리워드가 없음" });
     }
 
-    res.json({ success: true, reward: rewards, message: "리워드 조회 성공" });
+    res.status(200).json({ success: true, data: rewards, message: "리워드 조회 성공" });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });
   }
 });
 
-<<<<<<< HEAD
-
 module.exports = router;
-=======
-module.exports = router;
->>>>>>> bbb01b5e9cb99ad089079e3e355704d91dc16cdd

@@ -38,7 +38,7 @@ router.post(
           { expiresIn: 360000 },
           (err, token) => {
             if (err) throw err;
-            res.status(200).json({ success: true, token });
+            res.status(200).json({ success: true, token: token });
           }
         );
       } else {
@@ -130,7 +130,7 @@ router.post(
           { expiresIn: 360000 },
           (err, token) => {
             if (err) throw err;
-            res.status(201).json({ success: true, token });
+            res.status(201).json({ success: true, token: token });
           }
         );
       }
@@ -155,7 +155,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ success: false, msg: "사용자 조회 실패" });
     }
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
     console.error(error.message);
     if (error.kind === "ObjectId") {
@@ -194,7 +194,7 @@ router.patch("/", auth, async (req: Request, res: Response) => {
     const user = await User.findById(req.body.user.id).select(
       "-device_id -_id -__v"
     );
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });

@@ -54,7 +54,7 @@ router.get("/", async (req: Request, res: Response) => {
       .status(200)
       .json({
         success: true,
-        trashcans: trashresult,
+        data: trashresult,
         message: "전체 휴지통 조회 성공",
       });
   } catch (error) {
@@ -77,7 +77,7 @@ router.get("/:trashcan_id", auth, async (req: Request, res: Response) => {
     if (!trash) {
       return res.status(404).json({ msg: "특정 휴지 조회 실패" });
     }
-    res.status(200).json({ success: true, trash });
+    res.status(200).json({ success: true, data: trash });
   } catch (error) {
     console.error(error.message);
 

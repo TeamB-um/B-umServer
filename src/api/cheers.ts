@@ -33,7 +33,7 @@ router.post(
       });
 
       const cheer = await newCheers.save();
-      res.json(cheer);
+      res.status(201).json({success: true, data: cheer});
 
     } catch (err) {
       console.error(err.message);
@@ -53,7 +53,7 @@ router.get(
             return res.status(204).json({message : "응원 메세지가 없음."});
         }
 
-        res.json({cheer : cheers, message : "응원 메세지 조회 성공"});
+        res.status(200).json({success: true, data : cheers, message : "응원 메세지 조회 성공"});
 
     } catch (error){
         console.error(error.message);
