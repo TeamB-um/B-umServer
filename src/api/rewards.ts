@@ -45,7 +45,6 @@ router.post(
 
     try {
       const seq = (await RewardDummy.count()) + 1;
-
       const newRewards = new RewardDummy({
         sentence,
         author,
@@ -54,7 +53,7 @@ router.post(
       });
 
       const reward = await newRewards.save();
-      res.status(201).json({ success: true, data: reward });
+      res.status(201).json({ success: true, data: { reward } });
     } catch (err) {
       console.error(err.message);
       res.status(500).json({ success: false, msg: "서버 오류" });
@@ -72,7 +71,7 @@ router.get("/dummy", async (req: Request, res: Response) => {
 
     res
       .status(200)
-      .json({ success: true, data: rewards, message: "리워드 조회 성공" });
+      .json({ success: true, data: { rewards }, message: "리워드 조회 성공" });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });
@@ -89,7 +88,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
 
     res
       .status(200)
-      .json({ success: true, data: rewards, message: "리워드 조회 성공" });
+      .json({ success: true, data: { rewards }, message: "리워드 조회 성공" });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });

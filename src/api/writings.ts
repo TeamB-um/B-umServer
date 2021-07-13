@@ -47,6 +47,7 @@ router.post(
   [
     check("category_id", "category_id is required").not().isEmpty(),
     check("text", "text is required").not().isEmpty(),
+    check("iswriting", "iswriting is requied").not().isEmpty(),
   ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -70,7 +71,7 @@ router.post(
     if (req.body.user.id != categoryObjectcheck.user_id) {
       res
         .status(400)
-        .json({ success: false, msg: "카테고리가 유저와 일치하지 않음" });
+        .json({ success: false, message: "카테고리가 유저와 일치하지 않음" });
     } else {
       try {
         const user = await User.findById(req.body.user.id);
@@ -99,26 +100,57 @@ router.post(
         const inputcategoryObject = await Categories.findOne({
           _id: req.body.category_id,
         }).select("-__v");
-        const newWriting = new Writings({
-          title: title,
-          text: text,
-          user_id: user.id,
-          category: inputcategoryObject,
-          created_date: getCurrentDate(),
-          category_id: req.body.category_id,
-        });
-        const writing = await newWriting.save();
-        let writingresult: InputWritingsDTO = {
-          _id: writing.id,
-          title: writing.title,
-          text: writing.text,
-          category: writing.category,
-          created_date: writing.created_date,
-        };
-        res.status(201).json({ success: true, data: writingresult });
+        if (req.body.iswriting) {
+          const newWriting = new Writings({
+            title: title,
+            text: text,
+            user_id: user.id,
+            category: inputcategoryObject,
+            created_date: getCurrentDate(),
+            category_id: req.body.category_id,
+          });
+          const writing = await newWriting.save();
+          let writingresult: InputWritingsDTO = {
+            _id: writing.id,
+            title: writing.title,
+            text: writing.text,
+            category: writing.category,
+            created_date: writing.created_date,
+          };
+          res.status(201).json({ success: true, data: { writing } });
+        } else {
+          //현재 날짜를 생성날짜로 정하고
+          let created_date = getCurrentDate();
+          //user model에서 유통기한을 받아온 뒤
+          const delperiod = user.delperiod;
+          //두 날짜를 더해서 삭제 예정 날짜를 연산
+          //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
+          created_date = addDays(created_date, delperiod);
+
+          const newTrash = new Trashcans({
+            title: title,
+            text: text,
+            user_id: user.id,
+            category: inputcategoryObject,
+            created_date: getCurrentDate(),
+            category_id: req.body.category_id,
+            delperiod: user.delperiod,
+          });
+
+          const trash = await newTrash.save();
+          let trashresult = {
+            _id: trash.id,
+            title: trash.title,
+            text: trash.text,
+            category: trash.category,
+            created_date: trash.created_date,
+            delpeiod: trash.delperiod,
+          };
+          res.status(201).json({ success: true, data: { trashresult } });
+        }
       } catch (err) {
         console.error(err.message);
-        res.status(500).json({ success: false, msg: "서버 오류" });
+        res.status(500).json({ success: false, message: "서버 오류" });
       }
     }
   }
@@ -133,9 +165,12 @@ router.get("/", auth, async (req: Request, res: Response) => {
 
   let start_date = req.query.start_date;
   let end_date = req.query.end_date;
-  let category;
-  const category_list = String(req.query.category_ids);
-  const category_real_list = category_list.split(",");
+  let category = String(req.query.category_ids)
+    .replace("[", "")
+    .replace("]", "");
+  console.log(category);
+  console.log(typeof category);
+  const category_real_list = category.split(",");
   const Date_start_date = new Date(String(start_date));
   const Date_end_date = new Date(String(end_date));
   const user_id = req.body.user.id;
@@ -148,13 +183,12 @@ router.get("/", auth, async (req: Request, res: Response) => {
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         });
-        console.log(writings);
         if (writings.length != 0) {
-          res.status(200).json({ success: true, data: writings });
+          res.status(200).json({ success: true, data: { writings } });
         } else {
           res
             .status(404)
-            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
+            .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       } else {
         const writings = await Writing.find({
@@ -162,11 +196,11 @@ router.get("/", auth, async (req: Request, res: Response) => {
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         });
         if (writings.length != 0) {
-          res.status(200).json({ success: true, data: writings });
+          res.status(200).json({ success: true, data: { writings } });
         } else {
           res
             .status(404)
-            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
+            .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       }
     } else {
@@ -176,26 +210,26 @@ router.get("/", auth, async (req: Request, res: Response) => {
           category_id: { $in: category_real_list },
         });
         if (writings.length != 0) {
-          res.status(200).json({ success: true, writings });
+          res.status(200).json({ success: true, data: { writings } });
         } else {
           res
             .status(404)
-            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
+            .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       } else {
         const writings = await Writing.find({ user_id: { $eq: user_id } });
         if (writings.length != 0) {
-          res.status(200).json({ success: true, data: writings });
+          res.status(200).json({ success: true, data: { writings } });
         } else {
           res
             .status(404)
-            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
+            .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       }
     }
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ success: false, msg: "서버 오류" });
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 
@@ -272,66 +306,9 @@ router.get("/stat", auth, async (req: Request, res: Response) => {
     // }
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ success: false, msg: "서버 오류" });
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
-
-router.get(
-  "/rewards/:category_id",
-  auth,
-  async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    try {
-      const category = await Categories.findOne({
-        _id: req.params.category_id,
-      });
-      const user = await User.findOne({
-        _id: req.body.user.id,
-      });
-
-      const newseq = Number(user.seq) + 1;
-      const reward = await RewardDummy.findOne({
-        seq: user.seq,
-      });
-      console.log(newseq);
-      await User.findOneAndUpdate(
-        {
-          _id: req.body.user.id,
-        },
-        {
-          seq: newseq,
-        }
-      );
-
-      await Categories.findOneAndUpdate(
-        {
-          _id: req.params.category_id,
-        },
-        {
-          count: 0,
-        }
-      );
-
-      const newReward = new Rewards({
-        sentence: reward.sentence,
-        context: reward.context,
-        author: reward.author,
-        user_id: req.body.user_id,
-        index: category.index,
-        created_date: getCurrentDate(),
-      });
-
-      await newReward.save();
-      res.status(200).json({ success: true, data: reward });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ success: false, msg: "서버 오류" });
-    }
-  }
-);
 
 router.delete("/", auth, async (req: Request, res: Response) => {
   const errors = validationResult(req);
@@ -374,10 +351,10 @@ router.delete("/", auth, async (req: Request, res: Response) => {
     await Writing.deleteMany({
       _id: { $in: id_list },
     });
-    res.status(204).json({ success: true, msg: "보관함 글 삭제 완료" });
+    res.status(204).json({ success: true, message: "보관함 글 삭제 완료" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ success: false, msg: "서버 오류" });
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 

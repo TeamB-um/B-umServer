@@ -50,44 +50,14 @@ router.get("/", async (req: Request, res: Response) => {
         .json({ success: false, message: "휴지통이 비어 있음." });
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: trashresult,
-        message: "전체 휴지통 조회 성공",
-      });
+    res.status(200).json({
+      success: true,
+      data: { trashresult },
+      message: "전체 휴지통 조회 성공",
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).send("서버 오류");
-  }
-});
-
-/**
- *  @route GET api/trashcans/:id
- *  @desc Get trash by ID
- *  @access Private
- */
-router.get("/:trashcan_id", auth, async (req: Request, res: Response) => {
-  try {
-    const trash = await Trashcans.findById(req.params.trashcan_id).select(
-      "-user_id -__v -created_date -delperiod"
-    );
-
-    if (!trash) {
-      return res.status(404).json({ msg: "특정 휴지 조회 실패" });
-    }
-    res.status(200).json({ success: true, data: trash });
-  } catch (error) {
-    console.error(error.message);
-
-    if (error.kind === "ObjectId") {
-      return res
-        .status(404)
-        .json({ success: false, msg: "특정 휴지 조회 실패" });
-    }
-
-    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 
