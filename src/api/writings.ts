@@ -85,18 +85,19 @@ router.post(
         if (categorycount >= 5) {
           categorycount_img = 5;
         }
-        const category = await Categories.findOneAndUpdate(
-          {
-            _id: category_id,
-          },
-          {
-            $set: {
-              count: categorycount,
-              img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${categoryindex}-${categorycount_img}.png`,
+        if (req.body.iswriting) {
+          const category = await Categories.findOneAndUpdate(
+            {
+              _id: category_id,
             },
-          }
-        );
-
+            {
+              $set: {
+                count: categorycount,
+                img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${categoryindex}-${categorycount_img}.png`,
+              },
+            }
+          );
+        }
         const inputcategoryObject = await Categories.findOne({
           _id: req.body.category_id,
         }).select("-__v");
@@ -109,13 +110,14 @@ router.post(
             created_date: getCurrentDate(),
             category_id: req.body.category_id,
           });
-          const writing = await newWriting.save();
-          let writingresult: InputWritingsDTO = {
-            _id: writing.id,
-            title: writing.title,
-            text: writing.text,
-            category: writing.category,
-            created_date: writing.created_date,
+          const writingresult = await newWriting.save();
+          let writing = {
+            _id: writingresult.id,
+            title: writingresult.title,
+            text: writingresult.text,
+            category: writingresult.category,
+            created_date: writingresult.created_date,
+            category_id: writingresult.category_id,
           };
           res.status(201).json({ success: true, data: { writing } });
         } else {
@@ -123,6 +125,8 @@ router.post(
           let created_date = getCurrentDate();
           //user model에서 유통기한을 받아온 뒤
           const delperiod = user.delperiod;
+          console.log("user_delperiod");
+          console.log(user.delperiod);
           //두 날짜를 더해서 삭제 예정 날짜를 연산
           //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
           created_date = addDays(created_date, delperiod);
@@ -132,21 +136,22 @@ router.post(
             text: text,
             user_id: user.id,
             category: inputcategoryObject,
-            created_date: getCurrentDate(),
+            created_date: created_date,
             category_id: req.body.category_id,
             delperiod: user.delperiod,
           });
 
-          const trash = await newTrash.save();
-          let trashresult = {
-            _id: trash.id,
-            title: trash.title,
-            text: trash.text,
-            category: trash.category,
-            created_date: trash.created_date,
-            delpeiod: trash.delperiod,
+          const trashresult = await newTrash.save();
+          let trash = {
+            _id: trashresult.id,
+            title: trashresult.title,
+            text: trashresult.text,
+            category: trashresult.category,
+            created_date: trashresult.created_date,
+            category_id: trashresult.category_id,
+            delpeiod: trashresult.delperiod,
           };
-          res.status(201).json({ success: true, data: { trashresult } });
+          res.status(201).json({ success: true, data: { trash } });
         }
       } catch (err) {
         console.error(err.message);
@@ -239,9 +244,11 @@ router.get("/:writing_id", auth, async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
   try {
-    const writings = await Writing.find({
+    const writing = await Writing.findOne({
       _id: req.params.writing_id,
-    });
+      user_id: req.body.user.id,
+    }).select("-__v");
+    res.status(200).json({ success: true, data: { writing } });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: "서버 오류" });
@@ -254,59 +261,74 @@ router.get("/stat", auth, async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
+    //해당 사용자 ID에 대응하는 카테고리 이름을 찾아서 category 변수에 저장
     const category = await Categories.find({
       user_id: req.body.user.id,
     });
+    //해당 사용자 ID에 대응하는 카테고리들의 수를 찾아서 categorynumber 변수에 저장
     const categorynumber = await Categories.find({
       user_id: req.body.user.id,
     }).count();
+
+    //전체글 count
+    //카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
     var dicObject = {};
+    //전체 글의 개수를 all_cnt 변수에 저장
+    const all_cnt = await Writings.find({
+      user_id: req.body.user.id,
+    }).count();
+    //카테고리 개수만큼 반복
     for (let i = 0; i < categorynumber; i++) {
-      var newobject = {};
+      //전체 글 중 탐색 중인 카테고리 ID에 해당하는 글의 개수 count
       const cnt = await Writings.find({
         category_id: category[i]._id,
       }).count();
+      //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
+      const percent = Math.floor((cnt / all_cnt) * 100);
+      //카테고리 이름을 string 변환해서 name 변수에 저장
       const name = String(category[i].name);
-      newobject["name"] = name;
-      newobject["cnt"] = cnt;
+      //카테고리 이름을 key, 글 개수를 value로 저장
+      dicObject[name] = percent;
     }
-
+    //디버깅
     console.log(dicObject);
-    var sortable = [];
-    for (var name in dicObject) {
-      sortable.push([name, dicObject[name]]);
-    }
-    sortable.sort(function (a, b) {
-      if (b[1] > a[1]) {
-        return 1;
-      } else if (b[1] < a[1]) {
-        return -1;
-      } else {
-        console.log("a");
-        if (a[0] > b[0]) {
-          return 1;
-        } else if (a[0] < b[1]) {
-          return -1;
-        }
-      }
-    });
-    console.log(sortable);
-    console.log(categorynumber);
-    let sum = 0;
-    let allresult = {};
-    // for (let i =0;i<categorynumber;i++)
-    // {
-    //       if(i==0 && sortable[i][1]==0){
-    //         allresult["result"] = "작성된 글이 존재하지 않습니다."
-    //       }
-    //       else{
-    //          allresult[sortable[0][0]]=allresult[sortable[]]
+    console.log(all_cnt);
 
-    //       }
-    // }
+    //월별 count
+    //월별 카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
+    var month_dicObject = {};
+    //현재 날짜
+    const end_date = getCurrentDate();
+    //한달 전 날짜
+    let start_date = new Date(end_date);
+    start_date.setDate(end_date.getDate() - 30);
+
+    console.log(end_date);
+    console.log(start_date);
+
+    for (let j = 0; j < categorynumber; j++) {
+      //전체 글 중 탐색 중인 카테고리 ID에 해당하고, 한 달 이내에 작성된 글의 개수 count
+      const cnt = await Writings.find({
+        category_id: category[j]._id,
+        created_date: { $gte: start_date, $lte: end_date },
+      }).count();
+      //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
+      const percent = Math.floor((cnt / all_cnt) * 100);
+      //카테고리 이름을 string 변환해서 name 변수에 저장
+      const name = String(category[j].name);
+      //카테고리 이름을 key, 글 개수를 value로 저장
+      month_dicObject[name] = percent;
+    }
+    console.log(month_dicObject);
+
+    //전체 통계와 월별 통계를 반환
+    res.status(200).json({
+      success: true,
+      data: { allstat: dicObject, monthstat: month_dicObject },
+    });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ success: false, message: "서버 오류" });
+    res.status(500).json({ success: false, msg: "서버 오류" });
   }
 });
 
@@ -315,11 +337,11 @@ router.delete("/", auth, async (req: Request, res: Response) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: "false", errors: errors.array() });
   }
-  const writing_ids = String(req.query.writing_ids);
-  console.log(req.query.writing_ids);
+  console.log(req.query.ids);
+  const writing_ids = String(req.query.ids).replace("[", "").replace("]", "");
+  console.log(writing_ids);
   const id_list = writing_ids.split(",");
   console.log(id_list);
-
   try {
     for (let i = 0; i < id_list.length; i++) {
       const writing_info = await Writings.findById(id_list[i]);

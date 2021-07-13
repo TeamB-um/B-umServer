@@ -80,15 +80,15 @@ router.get("/dummy", async (req: Request, res: Response) => {
 
 router.get("/", auth, async (req: Request, res: Response) => {
   try {
-    const rewards = await Rewards.find().select("-__v");
+    const rewards = await Rewards.find({ user_id: req.body.user.id }).select(
+      "-__v"
+    );
 
     if (!rewards) {
       return res.status(404).json({ success: false, message: "리워드가 없음" });
     }
 
-    res
-      .status(200)
-      .json({ success: true, data: { rewards }, message: "리워드 조회 성공" });
+    res.status(200).json({ success: true, data: { rewards } });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, msg: "서버 오류" });
