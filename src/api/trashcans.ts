@@ -26,15 +26,19 @@ const router = Router();
  *  @access Private
  */
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", auth, async (req: Request, res: Response) => {
   try {
-    const trashcans = await Trashcans.find();
-    const trashcount = await Trashcans.find().count();
+    const trashcans = await Trashcans.find({ user_id: req.body.user.id });
+    const trashcount = await Trashcans.find({
+      user_id: req.body.user.id,
+    }).count();
     let trashresult = [];
     for (let i = 0; i < trashcount; i++) {
       const current: Date = getCurrentDate();
       const d_day =
         (trashcans[i].created_date.getTime() - current.getTime()) / 86400000;
+      console.log(trashcans[i].created_date);
+      console.log(current);
       const object = {
         _id: trashcans[i].id,
         title: trashcans[i].title,
@@ -44,7 +48,7 @@ router.get("/", async (req: Request, res: Response) => {
       };
       trashresult.push(object);
     }
-    if (!trashcans) {
+    if (!trashcans[0]) {
       return res
         .status(404)
         .json({ success: false, message: "휴지통이 비어 있음." });
@@ -53,7 +57,6 @@ router.get("/", async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       data: { trashresult },
-      message: "전체 휴지통 조회 성공",
     });
   } catch (error) {
     console.error(error.message);

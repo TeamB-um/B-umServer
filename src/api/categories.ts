@@ -102,6 +102,11 @@ router.post(
             count: categoryresult.count,
             created_date: categoryresult.created_date,
           };
+          await Categories.findOneAndUpdate(
+            { user_id: user.id, index: 8 },
+            { created_date: getCurrentDate() }
+          );
+
           res.status(201).json({ success: true, data: { category } });
         }
       } catch (err) {
@@ -120,7 +125,9 @@ router.get("/", auth, async (req: Request, res: Response) => {
   try {
     const categories = await Categories.find({
       user_id: req.body.user.id,
-    }).select("-user_id  -__v");
+    })
+      .sort({ created_date: 1 })
+      .select("-user_id  -__v");
     res.status(200).json({ success: true, data: { categories } });
   } catch (error) {
     console.error(error.message);
@@ -171,24 +178,24 @@ router.get(
           }
         );
 
-        const newReward = new Rewards({
+        const rewardresult = new Rewards({
           sentence: rewardcheck.sentence,
           context: rewardcheck.context,
           author: rewardcheck.author,
-          user_id: req.body.user_id,
+          user_id: req.body.user.id,
           index: category.index,
           created_date: getCurrentDate(),
         });
 
+        await rewardresult.save();
         const reward = {
-          sentence: rewardcheck.sentence,
-          context: rewardcheck.context,
-          author: rewardcheck.author,
-          user_id: req.body.user_id,
+          sentence: rewardresult.sentence,
+          context: rewardresult.context,
+          author: rewardresult.author,
+          user_id: req.body.user.id,
           index: category.index,
+          created_date: getCurrentDate(),
         };
-
-        await newReward.save();
         res.status(200).json({ success: true, data: { reward } });
       } else {
         res.status(400).json({

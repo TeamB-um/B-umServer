@@ -85,18 +85,19 @@ router.post(
         if (categorycount >= 5) {
           categorycount_img = 5;
         }
-        const category = await Categories.findOneAndUpdate(
-          {
-            _id: category_id,
-          },
-          {
-            $set: {
-              count: categorycount,
-              img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${categoryindex}-${categorycount_img}.png`,
+        if (req.body.iswriting) {
+          const category = await Categories.findOneAndUpdate(
+            {
+              _id: category_id,
             },
-          }
-        );
-
+            {
+              $set: {
+                count: categorycount,
+                img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${categoryindex}-${categorycount_img}.png`,
+              },
+            }
+          );
+        }
         const inputcategoryObject = await Categories.findOne({
           _id: req.body.category_id,
         }).select("-__v");
@@ -109,13 +110,14 @@ router.post(
             created_date: getCurrentDate(),
             category_id: req.body.category_id,
           });
-          const writing = await newWriting.save();
-          let writingresult: InputWritingsDTO = {
-            _id: writing.id,
-            title: writing.title,
-            text: writing.text,
-            category: writing.category,
-            created_date: writing.created_date,
+          const writingresult = await newWriting.save();
+          let writing = {
+            _id: writingresult.id,
+            title: writingresult.title,
+            text: writingresult.text,
+            category: writingresult.category,
+            created_date: writingresult.created_date,
+            category_id: writingresult.category_id,
           };
           res.status(201).json({ success: true, data: { writing } });
         } else {
@@ -123,6 +125,8 @@ router.post(
           let created_date = getCurrentDate();
           //user model에서 유통기한을 받아온 뒤
           const delperiod = user.delperiod;
+          console.log("user_delperiod");
+          console.log(user.delperiod);
           //두 날짜를 더해서 삭제 예정 날짜를 연산
           //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
           created_date = addDays(created_date, delperiod);
@@ -132,21 +136,22 @@ router.post(
             text: text,
             user_id: user.id,
             category: inputcategoryObject,
-            created_date: getCurrentDate(),
+            created_date: created_date,
             category_id: req.body.category_id,
             delperiod: user.delperiod,
           });
 
-          const trash = await newTrash.save();
-          let trashresult = {
-            _id: trash.id,
-            title: trash.title,
-            text: trash.text,
-            category: trash.category,
-            created_date: trash.created_date,
-            delpeiod: trash.delperiod,
+          const trashresult = await newTrash.save();
+          let trash = {
+            _id: trashresult.id,
+            title: trashresult.title,
+            text: trashresult.text,
+            category: trashresult.category,
+            created_date: trashresult.created_date,
+            category_id: trashresult.category_id,
+            delpeiod: trashresult.delperiod,
           };
-          res.status(201).json({ success: true, data: { trashresult } });
+          res.status(201).json({ success: true, data: { trash } });
         }
       } catch (err) {
         console.error(err.message);
@@ -239,9 +244,11 @@ router.get("/:writing_id", auth, async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
   try {
-    const writings = await Writing.find({
+    const writing = await Writing.findOne({
       _id: req.params.writing_id,
-    });
+      user_id: req.body.user.id,
+    }).select("-__v");
+    res.status(200).json({ success: true, data: { writing } });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: "서버 오류" });
@@ -315,7 +322,10 @@ router.get("/stat", auth, async (req: Request, res: Response) => {
     console.log(month_dicObject);
 
     //전체 통계와 월별 통계를 반환
-    res.status(200).json({ success: true, data: {allstat: dicObject, monthstat: month_dicObject}});
+    res.status(200).json({
+      success: true,
+      data: { allstat: dicObject, monthstat: month_dicObject },
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, msg: "서버 오류" });
@@ -327,11 +337,11 @@ router.delete("/", auth, async (req: Request, res: Response) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: "false", errors: errors.array() });
   }
-  const writing_ids = String(req.query.writing_ids);
-  console.log(req.query.writing_ids);
+  console.log(req.query.ids);
+  const writing_ids = String(req.query.ids).replace("[", "").replace("]", "");
+  console.log(writing_ids);
   const id_list = writing_ids.split(",");
   console.log(id_list);
-
   try {
     for (let i = 0; i < id_list.length; i++) {
       const writing_info = await Writings.findById(id_list[i]);
