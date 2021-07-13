@@ -254,59 +254,71 @@ router.get("/stat", auth, async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
+    //해당 사용자 ID에 대응하는 카테고리 이름을 찾아서 category 변수에 저장
     const category = await Categories.find({
       user_id: req.body.user.id,
     });
+    //해당 사용자 ID에 대응하는 카테고리들의 수를 찾아서 categorynumber 변수에 저장
     const categorynumber = await Categories.find({
       user_id: req.body.user.id,
     }).count();
+
+    //전체글 count
+    //카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
     var dicObject = {};
+    //전체 글의 개수를 all_cnt 변수에 저장
+    const all_cnt = await Writings.find({
+      user_id: req.body.user.id,
+    }).count();
+    //카테고리 개수만큼 반복
     for (let i = 0; i < categorynumber; i++) {
-      var newobject = {};
+      //전체 글 중 탐색 중인 카테고리 ID에 해당하는 글의 개수 count
       const cnt = await Writings.find({
         category_id: category[i]._id,
       }).count();
+      //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
+      const percent = Math.floor((cnt / all_cnt) * 100);
+      //카테고리 이름을 string 변환해서 name 변수에 저장
       const name = String(category[i].name);
-      newobject["name"] = name;
-      newobject["cnt"] = cnt;
+      //카테고리 이름을 key, 글 개수를 value로 저장
+      dicObject[name] = percent;
     }
-
+    //디버깅
     console.log(dicObject);
-    var sortable = [];
-    for (var name in dicObject) {
-      sortable.push([name, dicObject[name]]);
-    }
-    sortable.sort(function (a, b) {
-      if (b[1] > a[1]) {
-        return 1;
-      } else if (b[1] < a[1]) {
-        return -1;
-      } else {
-        console.log("a");
-        if (a[0] > b[0]) {
-          return 1;
-        } else if (a[0] < b[1]) {
-          return -1;
-        }
-      }
-    });
-    console.log(sortable);
-    console.log(categorynumber);
-    let sum = 0;
-    let allresult = {};
-    // for (let i =0;i<categorynumber;i++)
-    // {
-    //       if(i==0 && sortable[i][1]==0){
-    //         allresult["result"] = "작성된 글이 존재하지 않습니다."
-    //       }
-    //       else{
-    //          allresult[sortable[0][0]]=allresult[sortable[]]
+    console.log(all_cnt);
 
-    //       }
-    // }
+    //월별 count
+    //월별 카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
+    var month_dicObject = {};
+    //현재 날짜
+    const end_date = getCurrentDate();
+    //한달 전 날짜
+    let start_date = new Date(end_date);
+    start_date.setDate(end_date.getDate() - 30);
+
+    console.log(end_date);
+    console.log(start_date);
+
+    for (let j = 0; j < categorynumber; j++) {
+      //전체 글 중 탐색 중인 카테고리 ID에 해당하고, 한 달 이내에 작성된 글의 개수 count
+      const cnt = await Writings.find({
+        category_id: category[j]._id,
+        created_date: { $gte: start_date, $lte: end_date },
+      }).count();
+      //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
+      const percent = Math.floor((cnt / all_cnt) * 100);
+      //카테고리 이름을 string 변환해서 name 변수에 저장
+      const name = String(category[j].name);
+      //카테고리 이름을 key, 글 개수를 value로 저장
+      month_dicObject[name] = percent;
+    }
+    console.log(month_dicObject);
+
+    //전체 통계와 월별 통계를 반환
+    res.status(200).json({ success: true, data: {allstat: dicObject, monthstat: month_dicObject}});
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ success: false, message: "서버 오류" });
+    res.status(500).json({ success: false, msg: "서버 오류" });
   }
 });
 

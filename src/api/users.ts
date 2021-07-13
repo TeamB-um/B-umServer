@@ -119,6 +119,15 @@ router.post(
           created_date: getCurrentDate(),
         });
         await newCategory5.save();
+        const pluscategory = new Categories({
+          name: "추가하기",
+          user_id: user.id,
+          index: 8,
+          count: 0,
+          img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/8-0.png`,
+          created_date: getCurrentDate(),
+        });
+        await pluscategory.save();
         const payload = {
           user: {
             id: user.id,
