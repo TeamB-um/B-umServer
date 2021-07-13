@@ -26,19 +26,23 @@ router.post(
     const name = req.body.name;
     const checkname = await Categories.findOne({ name });
     if (checkname) {
-      res.status(500).json({ success: false, msg: "중복된 이름 유지" });
+      res.status(500).json({ success: false, message: "중복된 이름 유지" });
     } else {
       try {
         let newindex = -1;
         for (var i = 0; i < 8; i++) {
-          let ifcategory = await Categories.findOne({ index: i });
+          let ifcategory = await Categories.findOne({ index: i }).select(
+            "-__v"
+          );
           if (!ifcategory) {
             newindex = i;
             break;
           }
         }
         if (newindex == -1) {
-          res.status(500).json({ success: false, msg: "카테고리 8개 초과" });
+          res
+            .status(500)
+            .json({ success: false, message: "카테고리 8개 초과" });
         } else {
           const user = await User.findById(req.body.user.id);
           function getCurrentDate() {
@@ -77,11 +81,11 @@ router.post(
             img: category.img,
             created_date: category.created_date,
           };
-          res.json({ success: true, data: categoryresult });
+          res.json({ success: true, data: { categoryresult } });
         }
       } catch (err) {
         console.error(err.message);
-        res.status(500).json({ success: false, msg: "서버 오류" });
+        res.status(500).json({ success: false, message: "서버 오류" });
       }
     }
   }
@@ -93,13 +97,13 @@ router.get("/", auth, async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
   try {
-    const categories = await Categories.find().select(
-      "-user_id -index -count -__v"
-    );
-    res.status(200).json({ success: true, data: categories });
+    const categories = await Categories.find({
+      user_id: req.body.user.id,
+    }).select("-user_id -index -count -__v");
+    res.status(200).json({ success: true, data: { categories } });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ success: false, msg: "서버 오류" });
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 
@@ -118,10 +122,10 @@ router.delete("/:category_id", auth, async (req: Request, res: Response) => {
     });
     res
       .status(204)
-      .json({ success: true, msg: "카테고리 및 관련 글 삭제 완료" });
+      .json({ success: true, message: "카테고리 및 관련 글 삭제 완료" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ success: false, msg: "서버 오류" });
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 
@@ -140,10 +144,10 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
     const category = await Categories.findById(req.params.category_id).select(
       "_id name img"
     );
-    res.status(200).json({ success: true, data: category });
+    res.status(200).json({ success: true, data: { category } });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ success: false, msg: "서버 오류" });
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 

@@ -87,7 +87,7 @@ router.get("/:trashcan_id", auth, async (req: Request, res: Response) => {
         .json({ success: false, msg: "특정 휴지 조회 실패" });
     }
 
-    res.status(500).json({ success: false, msg: "서버 오류" });
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 

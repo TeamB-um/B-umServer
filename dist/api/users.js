@@ -42,7 +42,7 @@ router.post("/", [express_validator_1.check("device_id", "id is required").not()
             jsonwebtoken_1.default.sign(payload, config_1.default.jwtSecret, { expiresIn: 360000 }, (err, token) => {
                 if (err)
                     throw err;
-                res.status(200).json({ success: true, token: token });
+                res.status(200).json({ success: true, data: { token } });
             });
         }
         else {
@@ -127,7 +127,7 @@ router.post("/", [express_validator_1.check("device_id", "id is required").not()
             jsonwebtoken_1.default.sign(payload, config_1.default.jwtSecret, { expiresIn: 360000 }, (err, token) => {
                 if (err)
                     throw err;
-                res.status(201).json({ success: true, token: token });
+                res.status(201).json({ success: true, data: { token } });
             });
         }
     }
@@ -143,18 +143,22 @@ router.post("/", [express_validator_1.check("device_id", "id is required").not()
  */
 router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield Users_1.default.findById(req.body.user.id).select("-device_id -_id -__v");
+        const user = yield Users_1.default.findById(req.body.user.id).select("-device_id -_id -__v -seq");
         if (!user) {
-            return res.status(404).json({ success: false, msg: "사용자 조회 실패" });
+            return res
+                .status(404)
+                .json({ success: false, message: "사용자 조회 실패" });
         }
-        res.status(200).json({ success: true, data: user });
+        res.status(200).json({ success: true, data: { user } });
     }
     catch (error) {
         console.error(error.message);
         if (error.kind === "ObjectId") {
-            return res.status(404).json({ success: false, msg: "사용자 조회 실패" });
+            return res
+                .status(404)
+                .json({ success: false, message: "사용자 조회 실패" });
         }
-        res.status(500).json({ success: false, msg: "서버 오류" });
+        res.status(500).json({ success: false, message: "서버 오류" });
     }
 }));
 /**
@@ -163,30 +167,27 @@ router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, 
  *  @access Public
  */
 router.patch("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const ispush = req.body.ispush;
     const delperiod = req.body.delperiod;
-    if (typeof ispush != "boolean" ||
-        typeof delperiod != "number" ||
-        delperiod >= 8) {
-        res.status(400).json({ success: false, msg: "조건에 맞지 않는 요청" });
+    if (delperiod >= 8) {
+        res.status(400).json({ success: false, message: "조건에 맞지 않는 요청" });
     }
     try {
-        if (req.body.ispush != null) {
+        if (req.body.ispush != null && typeof req.body.ispush == "boolean") {
             yield Users_1.default.findByIdAndUpdate(req.body.user.id, {
                 ispush: req.body.ispush,
             });
         }
-        if (req.body.delperiod != null) {
+        if (req.body.delperiod != null && typeof req.body.delperiod == "number") {
             yield Users_1.default.findByIdAndUpdate(req.body.user.id, {
                 delperiod: req.body.delperiod,
             });
         }
-        const user = yield Users_1.default.findById(req.body.user.id).select("-device_id -_id -__v");
-        res.status(200).json({ success: true, data: user });
+        const user = yield Users_1.default.findById(req.body.user.id).select("-device_id -_id -__v -seq");
+        res.status(200).json({ success: true, data: { user } });
     }
     catch (error) {
         console.error(error.message);
-        res.status(500).json({ success: false, msg: "서버 오류" });
+        res.status(500).json({ success: false, message: "서버 오류" });
     }
 }));
 module.exports = router;

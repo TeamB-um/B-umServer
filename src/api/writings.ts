@@ -98,7 +98,7 @@ router.post(
 
         const inputcategoryObject = await Categories.findOne({
           _id: req.body.category_id,
-        });
+        }).select("-__v");
         const newWriting = new Writings({
           title: title,
           text: text,
@@ -130,8 +130,10 @@ router.get("/", auth, async (req: Request, res: Response) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
+
   let start_date = req.query.start_date;
   let end_date = req.query.end_date;
+  let category;
   const category_list = String(req.query.category_ids);
   const category_real_list = category_list.split(",");
   const Date_start_date = new Date(String(start_date));
@@ -139,75 +141,76 @@ router.get("/", auth, async (req: Request, res: Response) => {
   const user_id = req.body.user.id;
   console.log(category_real_list);
   try {
-    if (req.query.writing_id) {
-      const writing = await Writing.findOne({ _id: req.query.writing_id });
-      const writingresult: InputWritingsDTO = {
-        _id: writing.id,
-        title: writing.title,
-        text: writing.text,
-        category: writing.category,
-        created_date: writing.created_date,
-      };
-      res
-        .status(200)
-        .json({ success: true, msg: "글 1개 조회 완료", data: writingresult });
-    } else {
-      if (start_date) {
-        if (req.query.category_ids) {
-          const writings = await Writing.find({
-            user_id: user_id,
-            category_id: { $in: category_real_list },
-            created_date: { $gte: Date_start_date, $lte: Date_end_date },
-          });
-          console.log(writings);
-          if (writings.length != 0) {
-            res.status(200).json({ success: true, data: writings });
-          } else {
-            res
-              .status(404)
-              .json({ success: false, msg: "해당 필터 결과가 없습니다." });
-          }
+    if (start_date) {
+      if (req.query.category_ids) {
+        const writings = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list },
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        });
+        console.log(writings);
+        if (writings.length != 0) {
+          res.status(200).json({ success: true, data: writings });
         } else {
-          const writings = await Writing.find({
-            user_id: user_id,
-            created_date: { $gte: Date_start_date, $lte: Date_end_date },
-          });
-          if (writings.length != 0) {
-            res.status(200).json({ success: true, data: writings });
-          } else {
-            res
-              .status(404)
-              .json({ success: false, msg: "해당 필터 결과가 없습니다." });
-          }
+          res
+            .status(404)
+            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
         }
       } else {
-        if (req.query.category_ids) {
-          const writings = await Writing.find({
-            user_id: user_id,
-            category_id: { $in: category_real_list },
-          });
-          if (writings.length != 0) {
-            res.status(200).json({ success: true, writings });
-          } else {
-            res
-              .status(404)
-              .json({ success: false, msg: "해당 필터 결과가 없습니다." });
-          }
+        const writings = await Writing.find({
+          user_id: user_id,
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        });
+        if (writings.length != 0) {
+          res.status(200).json({ success: true, data: writings });
         } else {
-          const writings = await Writing.find({ user_id: { $eq: user_id } });
-          if (writings.length != 0) {
-            res.status(200).json({ success: true, data: writings });
-          } else {
-            res
-              .status(404)
-              .json({ success: false, msg: "해당 필터 결과가 없습니다." });
-          }
+          res
+            .status(404)
+            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
+        }
+      }
+    } else {
+      if (req.query.category_ids) {
+        const writings = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list },
+        });
+        if (writings.length != 0) {
+          res.status(200).json({ success: true, writings });
+        } else {
+          res
+            .status(404)
+            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
+        }
+      } else {
+        const writings = await Writing.find({ user_id: { $eq: user_id } });
+        if (writings.length != 0) {
+          res.status(200).json({ success: true, data: writings });
+        } else {
+          res
+            .status(404)
+            .json({ success: false, msg: "해당 필터 결과가 없습니다." });
         }
       }
     }
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, msg: "서버 오류" });
+  }
+});
+
+router.get("/:writing_id", auth, async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+  try {
+    const writings = await Writing.find({
+      _id: req.params.writing_id,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "서버 오류" });
   }
 });
 

@@ -66,7 +66,9 @@ router.get("/dummy", (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (!rewards) {
             return res.status(404).json({ success: false, message: "리워드가 없음" });
         }
-        res.status(200).json({ success: true, data: rewards, message: "리워드 조회 성공" });
+        res
+            .status(200)
+            .json({ success: true, data: rewards, message: "리워드 조회 성공" });
     }
     catch (error) {
         console.error(error.message);
@@ -79,7 +81,9 @@ router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, 
         if (!rewards) {
             return res.status(404).json({ success: false, message: "리워드가 없음" });
         }
-        res.status(200).json({ success: true, data: rewards, message: "리워드 조회 성공" });
+        res
+            .status(200)
+            .json({ success: true, data: rewards, message: "리워드 조회 성공" });
     }
     catch (error) {
         console.error(error.message);
