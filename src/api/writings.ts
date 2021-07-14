@@ -99,7 +99,10 @@ router.post(
           );
         }
         const newcategory = await Categories.findById(req.body.category_id);
-        await Writings.updateMany({category_id : req.body.category_id}, {category : newcategory});
+        await Writings.updateMany(
+          { category_id: req.body.category_id },
+          { category: newcategory }
+        );
         const inputcategoryObject = await Categories.findOne({
           _id: req.body.category_id,
         }).select("-__v -user_id");
@@ -164,7 +167,6 @@ router.post(
 
 router.get("/", auth, async (req: Request, res: Response) => {
   const errors = validationResult(req);
-  console.log(req.body);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
@@ -174,11 +176,11 @@ router.get("/", auth, async (req: Request, res: Response) => {
   let category = String(req.query.category_ids)
     .replace("[", "")
     .replace("]", "");
-  console.log(category);
-  console.log(typeof category);
   const category_real_list = category.split(",");
   const Date_start_date = new Date(String(start_date));
   const Date_end_date = new Date(String(end_date));
+  Date_end_date.setDate(Date_end_date.getDate() + 1);
+
   const user_id = req.body.user.id;
   console.log(category_real_list);
   try {
@@ -188,7 +190,9 @@ router.get("/", auth, async (req: Request, res: Response) => {
           user_id: user_id,
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        }).select("-__v -category_id -category.__v");
+        })
+          .select("-__v -category_id -category.__v")
+          .sort({ created_date: -1 });
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -200,7 +204,9 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writings = await Writing.find({
           user_id: user_id,
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        }).select("-__v -category_id -category.__v");
+        })
+          .select("-__v -category_id -category.__v")
+          .sort({ created_date: -1 });
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -214,7 +220,9 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writings = await Writing.find({
           user_id: user_id,
           category_id: { $in: category_real_list },
-        }).select("-__v -category_id -category.__v");
+        })
+          .select("-__v -category_id -category.__v")
+          .sort({ created_date: -1 });
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -223,7 +231,11 @@ router.get("/", auth, async (req: Request, res: Response) => {
             .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       } else {
-        const writings = await Writing.find({ user_id: { $eq: user_id } }).select("-__v -category_id -category.__v");
+        const writings = await Writing.find({
+          user_id: { $eq: user_id },
+        })
+          .select("-__v -category_id -category.__v")
+          .sort({ created_date: -1 });
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -268,7 +280,7 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
     const category = await Categories.find({
       user_id: user_id,
     });
-    console.log('category', category);
+    console.log("category", category);
     //해당 사용자 ID에 대응하는 카테고리들의 수를 찾아서 categorynumber 변수에 저장
     const categorynumber = await Categories.find({
       user_id: user_id,
@@ -308,7 +320,6 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
     let start_date = new Date(end_date);
     start_date.setDate(end_date.getDate() - 30);
 
-
     for (let j = 0; j < categorynumber; j++) {
       //전체 글 중 탐색 중인 카테고리 ID에 해당하고, 한 달 이내에 작성된 글의 개수 count
       const cnt = await Writings.find({
@@ -328,11 +339,11 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
     }
 
     var sort_stand = "percent";
-    
-    dicObject.sort(function(a,b) {
+
+    dicObject.sort(function (a, b) {
       return b[sort_stand] - a[sort_stand];
     });
-    month_dicObject.sort(function(a,b) {
+    month_dicObject.sort(function (a, b) {
       return b[sort_stand] - a[sort_stand];
     });
 

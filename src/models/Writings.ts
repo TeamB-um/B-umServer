@@ -18,7 +18,7 @@ const WritingsSchema = new mongoose.Schema({
   },
   category: {
     type: Object,
-    required : true,
+    required: true,
   },
   user_id: {
     type: mongoose.SchemaTypes.ObjectId,
@@ -30,4 +30,7 @@ const WritingsSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model<IWritings & mongoose.Document>("Writings", WritingsSchema);
+export default mongoose.model<IWritings & mongoose.Document>(
+  "Writings",
+  WritingsSchema
+);

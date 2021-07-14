@@ -28,7 +28,9 @@ const router = Router();
 
 router.get("/", auth, async (req: Request, res: Response) => {
   try {
-    const trashcans = await Trashcans.find({ user_id: req.body.user.id });
+    const trashcans = await Trashcans.find({ user_id: req.body.user.id }).sort({
+      created_date: -1,
+    });
     const trashcount = await Trashcans.find({
       user_id: req.body.user.id,
     }).count();
