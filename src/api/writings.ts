@@ -405,7 +405,7 @@ router.delete("/", auth, async (req: Request, res: Response) => {
     const writing = await Writings.find({
       user_id: req.body.user.id,
     }).select("-__v -category_id -category.__v");
-    res.status(204).json({ success: true, data: { writing } });
+    res.status(200).json({ success: true, data: { writing } });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: "서버 오류" });
