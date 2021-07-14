@@ -238,7 +238,7 @@ router.delete("/:category_id", auth, async (req: Request, res: Response) => {
         .sort({ created_date: 1 })
         .select("-user_id  -__v");
 
-      res.status(204).json({ success: true, data: { category } });
+      res.status(200).json({ success: true, data: { category } });
     } else {
       res.status(400).json({
         success: false,
