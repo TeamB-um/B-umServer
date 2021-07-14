@@ -275,7 +275,7 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
 
     //전체글 count
     //카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
-    var dicObject = {};
+    var dicObject = [];
     //전체 글의 개수를 all_cnt 변수에 저장
     const all_cnt = await Writings.find({
       user_id: user_id,
@@ -289,17 +289,18 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
         category_id: category[i]._id,
       }).count();
 
+      const index = category[i].index;
       //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
       const percent = Math.floor((cnt / all_cnt) * 100);
       //카테고리 이름을 string 변환해서 name 변수에 저장
       const name = String(category[i].name);
       //카테고리 이름을 key, 글 개수를 value로 저장
-      dicObject[name] = percent;
+      dicObject.push({ name: name, index: index, percent: percent });
     }
 
     //월별 count
     //월별 카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
-    var month_dicObject = {};
+    var month_dicObject = [];
     //현재 날짜
     const end_date = getCurrentDate();
     //한달 전 날짜
@@ -315,12 +316,14 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
         created_date: { $gte: start_date, $lte: end_date },
       }).count();
 
+      const index = category[j].index;
+
       //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
       const percent = Math.floor((cnt / all_cnt) * 100);
       //카테고리 이름을 string 변환해서 name 변수에 저장
       const name = String(category[j].name);
       //카테고리 이름을 key, 글 개수를 value로 저장
-      month_dicObject[name] = percent;
+      month_dicObject.push({ name: name, index: index, percent: percent });
     }
 
     //전체 통계와 월별 통계를 반환
