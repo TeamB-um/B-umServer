@@ -266,15 +266,15 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
       user_id: req.body.user.id,
     });
     if (categorycheck[0]) {
-      const check = await Categories.find({
+      const check = await Categories.findOne({
         user_id: req.body.user.id,
         name: req.body.name,
       });
 
-      if (check[0]) {
+      if (check) {
         res.status(500).json({ success: false, message: "중복된 이름 존재" });
       } else {
-        if (req.body.name != null) {
+        if (req.body.name !== null) {
           await Categories.findByIdAndUpdate(req.params.category_id, {
             name: req.body.name,
           });

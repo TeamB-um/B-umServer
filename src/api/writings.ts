@@ -270,13 +270,24 @@ router.get("/:writing_id", auth, async (req: Request, res: Response) => {
 
 router.get("/stat/graph", auth, async (req: Request, res: Response) => {
   const errors = validationResult(req);
-  console.log(req.body);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
   const user_id = req.body.user.id;
   try {
-    //해당 사용자 ID에 대응하는 카테고리 이름을 찾아서 category 변수에 저장
+    // const categorycount = await Writings.aggregate([
+    //   { $match: { user_id: req.body.user.id } },
+
+    //   { $group: { name: "$category_id", count: { $sum: 1 } } },
+
+    //   { $sort: { count: -1 } },
+    // ]);
+    // res.status(200).json({
+    //   success: true,
+    //   data: { categorycount },
+    // });
+
+    // 해당 사용자 ID에 대응하는 카테고리 이름을 찾아서 category 변수에 저장
     const category = await Categories.find({
       user_id: user_id,
     });
