@@ -62,7 +62,7 @@ router.post(
         }
         if (newindex == -1) {
           res
-            .status(500)
+            .status(405)
             .json({ success: false, message: "카테고리 8개 초과" });
         } else {
           const user = await User.findById(req.body.user.id);
@@ -95,15 +95,11 @@ router.post(
             img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${newindex}-0.png`,
             created_date: getCurrentDate(),
           });
-          const categoryresult = await newCategory.save();
-          const category = {
-            _id: categoryresult._id,
-            name: categoryresult.name,
-            img: categoryresult.img,
-            index: categoryresult.index,
-            count: categoryresult.count,
-            created_date: categoryresult.created_date,
-          };
+          await newCategory.save();
+          const category = await Categories.find({
+            user_id: req.body.user.id,
+          }).select("-__v -user_id ");
+
           res.status(201).json({ success: true, data: { category } });
         }
       } catch (err) {
@@ -120,12 +116,12 @@ router.get("/", auth, async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
   try {
-    const categories = await Categories.find({
+    const category = await Categories.find({
       user_id: req.body.user.id,
     })
       .sort({ created_date: 1 })
       .select("-user_id  -__v");
-    res.status(200).json({ success: true, data: { categories } });
+    res.status(200).json({ success: true, data: { category } });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, message: "서버 오류" });
@@ -227,9 +223,6 @@ router.delete("/:category_id", auth, async (req: Request, res: Response) => {
       user_id: req.body.user.id,
     });
     if (categorycheck[0]) {
-      const category = await Categories.findOne({
-        _id: req.params.category_id,
-      });
       await Posts.deleteMany({
         category_id: category_id,
       });
@@ -239,9 +232,13 @@ router.delete("/:category_id", auth, async (req: Request, res: Response) => {
       await Categories.deleteOne({
         _id: category_id,
       });
-      res
-        .status(204)
-        .json({ success: true, message: "카테고리 및 관련 글 삭제 완료" });
+      const category = await Categories.find({
+        user_id: req.body.user.id,
+      })
+        .sort({ created_date: 1 })
+        .select("-user_id  -__v");
+
+      res.status(204).json({ success: true, data: { category } });
     } else {
       res.status(400).json({
         success: false,
@@ -284,9 +281,11 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
             { category: newcategory }
           );
         }
-        const category = await Categories.findById(
-          req.params.category_id
-        ).select("_id name index count img");
+        const category = await Categories.find({
+          user_id: req.body.user.id,
+        })
+          .sort({ created_date: 1 })
+          .select("-user_id  -__v");
         res.status(200).json({ success: true, data: { category } });
       }
     } else {
