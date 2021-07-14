@@ -187,19 +187,19 @@ router.get("/", auth, async (req: Request, res: Response) => {
           user_id: user_id,
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        }).select("-__v -category_id");
+        }).select("-__v -category_id -category.__v");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
           res
             .status(404)
-            .json({ success: false, message: "해당 필터 결과가 없습니다." });
+            .json({ success: false, message: "해당 필터 결과가 없습니다. " });
         }
       } else {
         const writings = await Writing.find({
           user_id: user_id,
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        }).select("-__v -category_id");
+        }).select("-__v -category_id -category.__v");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -213,7 +213,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writings = await Writing.find({
           user_id: user_id,
           category_id: { $in: category_real_list },
-        }).select("-__v -category_id");
+        }).select("-__v -category_id -category.__v");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -222,7 +222,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
             .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       } else {
-        const writings = await Writing.find({ user_id: { $eq: user_id } }).select("-__v -category_id");
+        const writings = await Writing.find({ user_id: { $eq: user_id } }).select("-__v -category_id -category.__v");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
