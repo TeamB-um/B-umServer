@@ -102,11 +102,6 @@ router.post(
             count: categoryresult.count,
             created_date: categoryresult.created_date,
           };
-          await Categories.findOneAndUpdate(
-            { user_id: user.id, index: 8 },
-            { created_date: getCurrentDate() }
-          );
-
           res.status(201).json({ success: true, data: { category } });
         }
       } catch (err) {
