@@ -116,13 +116,9 @@ router.post(
             category_id: req.body.category_id,
           });
           const writingresult = await newWriting.save();
-          let writing = {
-            _id: writingresult.id,
-            title: writingresult.title,
-            text: writingresult.text,
-            category: inputcategoryObject,
-            created_date: writingresult.created_date,
-          };
+          const writing = await Writings.find({
+            user_id: req.body.user.id,
+          }).select("-__v -category_id -category.__v -category.user_id");
           res.status(201).json({ success: true, data: { writing } });
         } else {
           //현재 날짜를 생성날짜로 정하고
@@ -148,13 +144,9 @@ router.post(
           });
 
           const trashresult = await newTrash.save();
-          let writing = {
-            _id: trashresult.id,
-            title: trashresult.title,
-            text: trashresult.text,
-            category: inputcategoryObject,
-            created_date: trashresult.created_date,
-          };
+          const writing = await Trashcans.find({
+            user_id: req.body.user.id,
+          }).select("-__v -category_id -category.__v -category.user_id");
           res.status(201).json({ success: true, data: { writing } });
         }
       } catch (err) {
@@ -191,7 +183,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         })
-          .select("-__v -category_id -category.__v")
+          .select("-__v -category_id -category.__v -category.user_id")
           .sort({ created_date: -1 });
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
@@ -205,7 +197,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
           user_id: user_id,
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         })
-          .select("-__v -category_id -category.__v")
+          .select("-__v -category_id -category.__v -category.user_id")
           .sort({ created_date: -1 });
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
@@ -217,27 +209,27 @@ router.get("/", auth, async (req: Request, res: Response) => {
       }
     } else {
       if (req.query.category_ids) {
-        const writings = await Writing.find({
+        const writing = await Writing.find({
           user_id: user_id,
           category_id: { $in: category_real_list },
         })
-          .select("-__v -category_id -category.__v")
+          .select("-__v -category_id -category.__v -category.user_id")
           .sort({ created_date: -1 });
-        if (writings.length != 0) {
-          res.status(200).json({ success: true, data: { writings } });
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
         } else {
           res
             .status(404)
             .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       } else {
-        const writings = await Writing.find({
+        const writing = await Writing.find({
           user_id: { $eq: user_id },
         })
-          .select("-__v -category_id -category.__v")
+          .select("-__v -category_id -category.__v -category.user_id")
           .sort({ created_date: -1 });
-        if (writings.length != 0) {
-          res.status(200).json({ success: true, data: { writings } });
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
         } else {
           res
             .status(404)
@@ -257,10 +249,10 @@ router.get("/:writing_id", auth, async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
   try {
-    const writing = await Writing.findOne({
+    const writing = await Writing.find({
       _id: req.params.writing_id,
       user_id: req.body.user.id,
-    }).select("-__v");
+    }).select("-__v -category_id -category.__v -category.user_id");
     res.status(200).json({ success: true, data: { writing } });
   } catch (err) {
     console.error(err.message);
@@ -410,7 +402,10 @@ router.delete("/", auth, async (req: Request, res: Response) => {
     await Writing.deleteMany({
       _id: { $in: id_list },
     });
-    res.status(204).json({ success: true, message: "보관함 글 삭제 완료" });
+    const writing = await Writings.find({
+      user_id: req.body.user.id,
+    }).select("-__v -category_id -category.__v");
+    res.status(204).json({ success: true, data: { writing } });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: "서버 오류" });
