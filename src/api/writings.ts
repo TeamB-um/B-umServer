@@ -193,7 +193,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         } else {
           res
             .status(404)
-            .json({ success: false, message: "해당 필터 결과가 없습니다." });
+            .json({ success: false, message: "해당 필터 결과가 없습니다. " });
         }
       } else {
         const writings = await Writing.find({
