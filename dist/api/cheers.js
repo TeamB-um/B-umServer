@@ -32,7 +32,7 @@ router.post("/", auth_1.default, [express_validator_1.check("name", "name is req
         const newCheers = new Cheers_1.default({
             id,
             context,
-            img
+            img,
         });
         const cheer = yield newCheers.save();
         res.status(201).json({ success: true, data: cheer });
@@ -48,7 +48,9 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!cheers) {
             return res.status(204).json({ message: "응원 메세지가 없음." });
         }
-        res.status(200).json({ success: true, data: cheers, message: "응원 메세지 조회 성공" });
+        res
+            .status(200)
+            .json({ success: true, data: cheers, message: "응원 메세지 조회 성공" });
     }
     catch (error) {
         console.error(error.message);

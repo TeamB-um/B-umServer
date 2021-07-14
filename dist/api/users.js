@@ -133,7 +133,7 @@ router.post("/", [express_validator_1.check("device_id", "id is required").not()
     }
     catch (err) {
         console.error(err.message);
-        res.status(500).json({ success: false, msg: "서버 오류" });
+        res.status(500).json({ success: false, message: "서버 오류" });
     }
 }));
 /**
