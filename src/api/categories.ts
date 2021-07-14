@@ -165,7 +165,9 @@ router.get(
             seq: newseq,
           }
         );
-        const Categoryindex =  await Categories.findOne({_id: req.params.category_id,});
+        const Categoryindex = await Categories.findOne({
+          _id: req.params.category_id,
+        });
         const index = Categoryindex.index;
         await Categories.findOneAndUpdate(
           {
@@ -173,11 +175,14 @@ router.get(
           },
           {
             count: 0,
-            img : `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${index}-0.png`,
+            img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${index}-0.png`,
           }
         );
         const newcategory = await Categories.findById(req.params.category_id);
-        await Writings.updateMany({category_id : req.params.category_id}, {category : newcategory});
+        await Writings.updateMany(
+          { category_id: req.params.category_id },
+          { category: newcategory }
+        );
         const rewardresult = new Rewards({
           sentence: rewardcheck.sentence,
           context: rewardcheck.context,
@@ -274,7 +279,10 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
             name: req.body.name,
           });
           const newcategory = await Categories.findById(req.params.category_id);
-          await Writings.updateMany({category_id : req.params.category_id}, {category : newcategory});
+          await Writings.updateMany(
+            { category_id: req.params.category_id },
+            { category: newcategory }
+          );
         }
         const category = await Categories.findById(
           req.params.category_id
