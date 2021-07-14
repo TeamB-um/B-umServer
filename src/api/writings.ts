@@ -98,9 +98,11 @@ router.post(
             }
           );
         }
+        const newcategory = await Categories.findById(req.body.category_id);
+        await Writings.updateMany({category_id : req.body.category_id}, {category : newcategory});
         const inputcategoryObject = await Categories.findOne({
           _id: req.body.category_id,
-        }).select("-__v");
+        }).select("-__v -user_id");
         if (req.body.iswriting) {
           const newWriting = new Writings({
             title: title,
@@ -115,9 +117,8 @@ router.post(
             _id: writingresult.id,
             title: writingresult.title,
             text: writingresult.text,
-            category: writingresult.category,
+            category: inputcategoryObject,
             created_date: writingresult.created_date,
-            category_id: writingresult.category_id,
           };
           res.status(201).json({ success: true, data: { writing } });
         } else {
@@ -142,16 +143,15 @@ router.post(
           });
 
           const trashresult = await newTrash.save();
-          let trash = {
+          let writing = {
             _id: trashresult.id,
             title: trashresult.title,
             text: trashresult.text,
             category: trashresult.category,
             created_date: trashresult.created_date,
             category_id: trashresult.category_id,
-            delpeiod: trashresult.delperiod,
           };
-          res.status(201).json({ success: true, data: { trash } });
+          res.status(201).json({ success: true, data: { writing } });
         }
       } catch (err) {
         console.error(err.message);
@@ -187,7 +187,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
           user_id: user_id,
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        });
+        }).select("-__v -category_id");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -199,7 +199,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writings = await Writing.find({
           user_id: user_id,
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        });
+        }).select("-__v -category_id");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -213,7 +213,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writings = await Writing.find({
           user_id: user_id,
           category_id: { $in: category_real_list },
-        });
+        }).select("-__v -category_id");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
@@ -222,7 +222,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
             .json({ success: false, message: "해당 필터 결과가 없습니다." });
         }
       } else {
-        const writings = await Writing.find({ user_id: { $eq: user_id } });
+        const writings = await Writing.find({ user_id: { $eq: user_id } }).select("-__v -category_id");
         if (writings.length != 0) {
           res.status(200).json({ success: true, data: { writings } });
         } else {
