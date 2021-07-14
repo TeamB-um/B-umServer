@@ -7,6 +7,8 @@ import Categories from "../models/Categories";
 import RewardDummy from "../models/Rewards_dummy";
 import Rewards from "../models/Rewards";
 import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "node:constants";
+import Writings from "../models/Writings";
+import Trashcans from "../models/Trashcans";
 
 const router = Router();
 
@@ -163,16 +165,19 @@ router.get(
             seq: newseq,
           }
         );
-
+        const Categoryindex =  await Categories.findOne({_id: req.params.category_id,});
+        const index = Categoryindex.index;
         await Categories.findOneAndUpdate(
           {
             _id: req.params.category_id,
           },
           {
             count: 0,
+            img : `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${index}-0.png`,
           }
         );
-
+        const newcategory = await Categories.findById(req.params.category_id);
+        await Writings.updateMany({category_id : req.params.category_id}, {category : newcategory});
         const rewardresult = new Rewards({
           sentence: rewardcheck.sentence,
           context: rewardcheck.context,
@@ -223,6 +228,9 @@ router.delete("/:category_id", auth, async (req: Request, res: Response) => {
       await Posts.deleteMany({
         category_id: category_id,
       });
+      await Trashcans.deleteMany({
+        category_id: category_id,
+      });
       await Categories.deleteOne({
         _id: category_id,
       });
@@ -265,6 +273,8 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
           await Categories.findByIdAndUpdate(req.params.category_id, {
             name: req.body.name,
           });
+          const newcategory = await Categories.findById(req.params.category_id);
+          await Writings.updateMany({category_id : req.params.category_id}, {category : newcategory});
         }
         const category = await Categories.findById(
           req.params.category_id
