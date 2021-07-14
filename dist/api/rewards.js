@@ -53,7 +53,7 @@ router.post("/", auth_1.default, [
             seq,
         });
         const reward = yield newRewards.save();
-        res.status(201).json({ success: true, data: reward });
+        res.status(201).json({ success: true, data: { reward } });
     }
     catch (err) {
         console.error(err.message);
@@ -68,7 +68,7 @@ router.get("/dummy", (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
         res
             .status(200)
-            .json({ success: true, data: rewards, message: "리워드 조회 성공" });
+            .json({ success: true, data: { rewards }, message: "리워드 조회 성공" });
     }
     catch (error) {
         console.error(error.message);
@@ -77,13 +77,11 @@ router.get("/dummy", (req, res) => __awaiter(void 0, void 0, void 0, function* (
 }));
 router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const rewards = yield Rewards_1.default.find().select("-__v");
+        const rewards = yield Rewards_1.default.find({ user_id: req.body.user.id }).select("-__v");
         if (!rewards) {
             return res.status(404).json({ success: false, message: "리워드가 없음" });
         }
-        res
-            .status(200)
-            .json({ success: true, data: rewards, message: "리워드 조회 성공" });
+        res.status(200).json({ success: true, data: { rewards } });
     }
     catch (error) {
         console.error(error.message);
