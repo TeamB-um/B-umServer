@@ -44,7 +44,7 @@ router.post(
     const name = req.body.name;
     const checkname = await Categories.findOne({ name });
     if (checkname) {
-      res.status(500).json({ success: false, message: "중복된 이름 존재" });
+      res.status(409).json({ success: false, message: "중복된 이름 존재" });
     } else {
       try {
         let newindex = -1;
@@ -269,7 +269,7 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
       });
 
       if (check) {
-        res.status(500).json({ success: false, message: "중복된 이름 존재" });
+        res.status(409).json({ success: false, message: "중복된 이름 존재" });
       } else {
         if (req.body.name !== null) {
           await Categories.findByIdAndUpdate(req.params.category_id, {
