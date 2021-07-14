@@ -131,7 +131,9 @@ router.post(
           //두 날짜를 더해서 삭제 예정 날짜를 연산
           //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
           created_date = addDays(created_date, delperiod);
-
+          const inputcategoryObject = await Categories.findOne({
+            _id: req.body.category_id,
+          }).select("-__v -user_id");
           const newTrash = new Trashcans({
             title: title,
             text: text,
@@ -147,9 +149,8 @@ router.post(
             _id: trashresult.id,
             title: trashresult.title,
             text: trashresult.text,
-            category: trashresult.category,
+            category: inputcategoryObject,
             created_date: trashresult.created_date,
-            category_id: trashresult.category_id,
           };
           res.status(201).json({ success: true, data: { writing } });
         }
@@ -345,7 +346,7 @@ router.delete("/", auth, async (req: Request, res: Response) => {
   try {
     for (let i = 0; i < id_list.length; i++) {
       const writing_info = await Writings.findById(id_list[i]);
-      const user = await User.findById(writing_info.user_id);
+      const user = await User.findById(req.body.user.id);
       const title = writing_info.title;
       const text = writing_info.text;
       const user_id = writing_info.user_id;
