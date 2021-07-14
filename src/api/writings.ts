@@ -326,6 +326,15 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
       month_dicObject.push({ name: name, index: index, percent: percent });
     }
 
+    var sort_stand = "percent";
+    
+    dicObject.sort(function(a,b) {
+      return b[sort_stand] - a[sort_stand];
+    });
+    month_dicObject.sort(function(a,b) {
+      return b[sort_stand] - a[sort_stand];
+    });
+
     //전체 통계와 월별 통계를 반환
     res.status(200).json({
       success: true,
