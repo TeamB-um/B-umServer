@@ -179,29 +179,29 @@ router.get("/", auth, async (req: Request, res: Response) => {
   try {
     if (start_date) {
       if (req.query.category_ids) {
-        const writings = await Writing.find({
+        const writing = await Writing.find({
           user_id: user_id,
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         })
           .select("-__v -category_id -category.__v -category.user_id")
           .sort({ created_date: -1 });
-        if (writings.length != 0) {
-          res.status(200).json({ success: true, data: { writings } });
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
         } else {
           res
             .status(404)
             .json({ success: false, message: "해당 필터 결과가 없습니다. " });
         }
       } else {
-        const writings = await Writing.find({
+        const writing = await Writing.find({
           user_id: user_id,
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         })
           .select("-__v -category_id -category.__v -category.user_id")
           .sort({ created_date: -1 });
-        if (writings.length != 0) {
-          res.status(200).json({ success: true, data: { writings } });
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
         } else {
           res
             .status(404)

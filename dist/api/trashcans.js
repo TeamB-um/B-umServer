@@ -34,7 +34,9 @@ const router = express_1.Router();
  */
 router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const trashcans = yield Trashcans_1.default.find({ user_id: req.body.user.id });
+        const trashcans = yield Trashcans_1.default.find({ user_id: req.body.user.id }).sort({
+            created_date: -1,
+        });
         const trashcount = yield Trashcans_1.default.find({
             user_id: req.body.user.id,
         }).count();
