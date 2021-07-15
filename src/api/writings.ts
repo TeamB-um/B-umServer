@@ -162,7 +162,8 @@ router.get("/", auth, async (req: Request, res: Response) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
-
+  console.log(typeof req.query.start_date);
+  console.log(req.query.start_date);
   let start_date = req.query.start_date;
   let end_date = req.query.end_date;
   let category = String(req.query.category_ids)
