@@ -107,13 +107,9 @@ router.post("/", auth_1.default, [
                     category_id: req.body.category_id,
                 });
                 const writingresult = yield newWriting.save();
-                let writing = {
-                    _id: writingresult.id,
-                    title: writingresult.title,
-                    text: writingresult.text,
-                    category: inputcategoryObject,
-                    created_date: writingresult.created_date,
-                };
+                const writing = yield Writings_2.default.find({
+                    user_id: req.body.user.id,
+                }).select("-__v -category_id -category.__v -category.user_id");
                 res.status(201).json({ success: true, data: { writing } });
             }
             else {
@@ -126,6 +122,9 @@ router.post("/", auth_1.default, [
                 //두 날짜를 더해서 삭제 예정 날짜를 연산
                 //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
                 created_date = addDays(created_date, delperiod);
+                const inputcategoryObject = yield Categories_1.default.findOne({
+                    _id: req.body.category_id,
+                }).select("-__v -user_id");
                 const newTrash = new Trashcans_1.default({
                     title: title,
                     text: text,
@@ -136,14 +135,9 @@ router.post("/", auth_1.default, [
                     delperiod: user.delperiod,
                 });
                 const trashresult = yield newTrash.save();
-                let writing = {
-                    _id: trashresult.id,
-                    title: trashresult.title,
-                    text: trashresult.text,
-                    category: trashresult.category,
-                    created_date: trashresult.created_date,
-                    category_id: trashresult.category_id,
-                };
+                const writing = yield Trashcans_1.default.find({
+                    user_id: req.body.user.id,
+                }).select("-__v -category_id -category.__v -category.user_id");
                 res.status(201).json({ success: true, data: { writing } });
             }
         }
@@ -155,44 +149,49 @@ router.post("/", auth_1.default, [
 }));
 router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
-    console.log(req.body);
     if (!errors.isEmpty()) {
         return res.status(400).json({ success: false, errors: errors.array() });
     }
+    console.log(typeof req.query.start_date);
+    console.log(req.query.start_date);
     let start_date = req.query.start_date;
     let end_date = req.query.end_date;
     let category = String(req.query.category_ids)
         .replace("[", "")
         .replace("]", "");
-    console.log(category);
-    console.log(typeof category);
     const category_real_list = category.split(",");
     const Date_start_date = new Date(String(start_date));
     const Date_end_date = new Date(String(end_date));
+    Date_end_date.setDate(Date_end_date.getDate() + 1);
     const user_id = req.body.user.id;
     console.log(category_real_list);
     try {
         if (start_date) {
+            console.log("a");
             if (req.query.category_ids) {
                 const writings = yield Writings_1.default.find({
                     user_id: user_id,
                     category_id: { $in: category_real_list },
                     created_date: { $gte: Date_start_date, $lte: Date_end_date },
-                }).select("-__v -category_id");
+                })
+                    .select("-__v -category_id -category.__v -category.user_id")
+                    .sort({ created_date: -1 });
                 if (writings.length != 0) {
                     res.status(200).json({ success: true, data: { writings } });
                 }
                 else {
                     res
                         .status(404)
-                        .json({ success: false, message: "해당 필터 결과가 없습니다." });
+                        .json({ success: false, message: "해당 필터 결과가 없습니다. " });
                 }
             }
             else {
                 const writings = yield Writings_1.default.find({
                     user_id: user_id,
                     created_date: { $gte: Date_start_date, $lte: Date_end_date },
-                }).select("-__v -category_id");
+                })
+                    .select("-__v -category_id -category.__v -category.user_id")
+                    .sort({ created_date: -1 });
                 if (writings.length != 0) {
                     res.status(200).json({ success: true, data: { writings } });
                 }
@@ -205,12 +204,14 @@ router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, 
         }
         else {
             if (req.query.category_ids) {
-                const writings = yield Writings_1.default.find({
+                const writing = yield Writings_1.default.find({
                     user_id: user_id,
                     category_id: { $in: category_real_list },
-                }).select("-__v -category_id");
-                if (writings.length != 0) {
-                    res.status(200).json({ success: true, data: { writings } });
+                })
+                    .select("-__v -category_id -category.__v -category.user_id")
+                    .sort({ created_date: -1 });
+                if (writing.length != 0) {
+                    res.status(200).json({ success: true, data: { writing } });
                 }
                 else {
                     res
@@ -219,9 +220,13 @@ router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, 
                 }
             }
             else {
-                const writings = yield Writings_1.default.find({ user_id: { $eq: user_id } }).select("-__v -category_id");
-                if (writings.length != 0) {
-                    res.status(200).json({ success: true, data: { writings } });
+                const writing = yield Writings_1.default.find({
+                    user_id: { $eq: user_id },
+                })
+                    .select("-__v -category_id -category.__v -category.user_id")
+                    .sort({ created_date: -1 });
+                if (writing.length != 0) {
+                    res.status(200).json({ success: true, data: { writing } });
                 }
                 else {
                     res
@@ -242,10 +247,10 @@ router.get("/:writing_id", auth_1.default, (req, res) => __awaiter(void 0, void 
         return res.status(400).json({ success: false, errors: errors.array() });
     }
     try {
-        const writing = yield Writings_1.default.findOne({
+        const writing = yield Writings_1.default.find({
             _id: req.params.writing_id,
             user_id: req.body.user.id,
-        }).select("-__v");
+        }).select("-__v -category_id -category.__v -category.user_id");
         res.status(200).json({ success: true, data: { writing } });
     }
     catch (err) {
@@ -253,67 +258,83 @@ router.get("/:writing_id", auth_1.default, (req, res) => __awaiter(void 0, void 
         res.status(500).json({ success: false, message: "서버 오류" });
     }
 }));
-router.get("/stat", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/stat/graph", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+    const user_id = req.body.user.id;
     try {
-        //해당 사용자 ID에 대응하는 카테고리 이름을 찾아서 category 변수에 저장
+        // const categorycount = await Writings.aggregate([
+        //   { $match: { user_id: req.body.user.id } },
+        //   { $group: { name: "$category_id", count: { $sum: 1 } } },
+        //   { $sort: { count: -1 } },
+        // ]);
+        // res.status(200).json({
+        //   success: true,
+        //   data: { categorycount },
+        // });
+        // 해당 사용자 ID에 대응하는 카테고리 이름을 찾아서 category 변수에 저장
         const category = yield Categories_1.default.find({
-            user_id: req.body.user.id,
+            user_id: user_id,
         });
+        console.log("category", category);
         //해당 사용자 ID에 대응하는 카테고리들의 수를 찾아서 categorynumber 변수에 저장
         const categorynumber = yield Categories_1.default.find({
-            user_id: req.body.user.id,
+            user_id: user_id,
         }).count();
         //전체글 count
         //카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
-        var dicObject = {};
+        var dicObject = [];
         //전체 글의 개수를 all_cnt 변수에 저장
         const all_cnt = yield Writings_2.default.find({
-            user_id: req.body.user.id,
+            user_id: user_id,
         }).count();
         //카테고리 개수만큼 반복
         for (let i = 0; i < categorynumber; i++) {
             //전체 글 중 탐색 중인 카테고리 ID에 해당하는 글의 개수 count
             const cnt = yield Writings_2.default.find({
+                user_id: user_id,
                 category_id: category[i]._id,
             }).count();
+            const index = category[i].index;
             //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
             const percent = Math.floor((cnt / all_cnt) * 100);
             //카테고리 이름을 string 변환해서 name 변수에 저장
             const name = String(category[i].name);
             //카테고리 이름을 key, 글 개수를 value로 저장
-            dicObject[name] = percent;
+            dicObject.push({ name: name, index: index, percent: percent });
         }
-        //디버깅
-        console.log(dicObject);
-        console.log(all_cnt);
         //월별 count
         //월별 카테고리 이름과 글의 개수를 담는 딕셔너리 (key: 카테고리 이름, value: 카테고리 글 개수)
-        var month_dicObject = {};
+        var month_dicObject = [];
         //현재 날짜
         const end_date = getCurrentDate();
         //한달 전 날짜
         let start_date = new Date(end_date);
         start_date.setDate(end_date.getDate() - 30);
-        console.log(end_date);
-        console.log(start_date);
         for (let j = 0; j < categorynumber; j++) {
             //전체 글 중 탐색 중인 카테고리 ID에 해당하고, 한 달 이내에 작성된 글의 개수 count
             const cnt = yield Writings_2.default.find({
+                user_id: user_id,
                 category_id: category[j]._id,
                 created_date: { $gte: start_date, $lte: end_date },
             }).count();
+            const index = category[j].index;
             //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
             const percent = Math.floor((cnt / all_cnt) * 100);
             //카테고리 이름을 string 변환해서 name 변수에 저장
             const name = String(category[j].name);
             //카테고리 이름을 key, 글 개수를 value로 저장
-            month_dicObject[name] = percent;
+            month_dicObject.push({ name: name, index: index, percent: percent });
         }
-        console.log(month_dicObject);
+        var sort_stand = "percent";
+        dicObject.sort(function (a, b) {
+            return b[sort_stand] - a[sort_stand];
+        });
+        month_dicObject.sort(function (a, b) {
+            return b[sort_stand] - a[sort_stand];
+        });
         //전체 통계와 월별 통계를 반환
         res.status(200).json({
             success: true,
@@ -338,7 +359,7 @@ router.delete("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 
     try {
         for (let i = 0; i < id_list.length; i++) {
             const writing_info = yield Writings_2.default.findById(id_list[i]);
-            const user = yield Users_1.default.findById(writing_info.user_id);
+            const user = yield Users_1.default.findById(req.body.user.id);
             const title = writing_info.title;
             const text = writing_info.text;
             const user_id = writing_info.user_id;
@@ -363,7 +384,10 @@ router.delete("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 
         yield Writings_1.default.deleteMany({
             _id: { $in: id_list },
         });
-        res.status(204).json({ success: true, message: "보관함 글 삭제 완료" });
+        const writing = yield Writings_2.default.find({
+            user_id: req.body.user.id,
+        }).select("-__v -category_id -category.__v");
+        res.status(200).json({ success: true, data: { writing } });
     }
     catch (err) {
         console.error(err.message);

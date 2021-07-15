@@ -47,7 +47,7 @@ router.post("/", auth_1.default, [express_validator_1.check("name", "name is req
     const name = req.body.name;
     const checkname = yield Categories_1.default.findOne({ name });
     if (checkname) {
-        res.status(500).json({ success: false, message: "중복된 이름 존재" });
+        res.status(409).json({ success: false, message: "중복된 이름 존재" });
     }
     else {
         try {
@@ -66,7 +66,7 @@ router.post("/", auth_1.default, [express_validator_1.check("name", "name is req
             }
             if (newindex == -1) {
                 res
-                    .status(500)
+                    .status(405)
                     .json({ success: false, message: "카테고리 8개 초과" });
             }
             else {
@@ -90,15 +90,10 @@ router.post("/", auth_1.default, [express_validator_1.check("name", "name is req
                     img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${newindex}-0.png`,
                     created_date: getCurrentDate(),
                 });
-                const categoryresult = yield newCategory.save();
-                const category = {
-                    _id: categoryresult._id,
-                    name: categoryresult.name,
-                    img: categoryresult.img,
-                    index: categoryresult.index,
-                    count: categoryresult.count,
-                    created_date: categoryresult.created_date,
-                };
+                yield newCategory.save();
+                const category = yield Categories_1.default.find({
+                    user_id: req.body.user.id,
+                }).select("-__v -user_id ");
                 res.status(201).json({ success: true, data: { category } });
             }
         }
@@ -114,12 +109,12 @@ router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, 
         return res.status(400).json({ success: false, errors: errors.array() });
     }
     try {
-        const categories = yield Categories_1.default.find({
+        const category = yield Categories_1.default.find({
             user_id: req.body.user.id,
         })
             .sort({ created_date: 1 })
             .select("-user_id  -__v");
-        res.status(200).json({ success: true, data: { categories } });
+        res.status(200).json({ success: true, data: { category } });
     }
     catch (error) {
         console.error(error.message);
@@ -152,7 +147,9 @@ router.get("/:category_id/rewards", auth_1.default, (req, res) => __awaiter(void
             }, {
                 seq: newseq,
             });
-            const Categoryindex = yield Categories_1.default.findOne({ _id: req.params.category_id, });
+            const Categoryindex = yield Categories_1.default.findOne({
+                _id: req.params.category_id,
+            });
             const index = Categoryindex.index;
             yield Categories_1.default.findOneAndUpdate({
                 _id: req.params.category_id,
@@ -205,9 +202,6 @@ router.delete("/:category_id", auth_1.default, (req, res) => __awaiter(void 0, v
             user_id: req.body.user.id,
         });
         if (categorycheck[0]) {
-            const category = yield Categories_1.default.findOne({
-                _id: req.params.category_id,
-            });
             yield Writings_1.default.deleteMany({
                 category_id: category_id,
             });
@@ -217,9 +211,12 @@ router.delete("/:category_id", auth_1.default, (req, res) => __awaiter(void 0, v
             yield Categories_1.default.deleteOne({
                 _id: category_id,
             });
-            res
-                .status(204)
-                .json({ success: true, message: "카테고리 및 관련 글 삭제 완료" });
+            const category = yield Categories_1.default.find({
+                user_id: req.body.user.id,
+            })
+                .sort({ created_date: 1 })
+                .select("-user_id  -__v");
+            res.status(200).json({ success: true, data: { category } });
         }
         else {
             res.status(400).json({
@@ -245,22 +242,26 @@ router.patch("/:category_id", auth_1.default, (req, res) => __awaiter(void 0, vo
             user_id: req.body.user.id,
         });
         if (categorycheck[0]) {
-            const check = yield Categories_1.default.find({
+            const check = yield Categories_1.default.findOne({
                 user_id: req.body.user.id,
                 name: req.body.name,
             });
-            if (check[0]) {
-                res.status(500).json({ success: false, message: "중복된 이름 존재" });
+            if (check) {
+                res.status(409).json({ success: false, message: "중복된 이름 존재" });
             }
             else {
-                if (req.body.name != null) {
+                if (req.body.name !== null) {
                     yield Categories_1.default.findByIdAndUpdate(req.params.category_id, {
                         name: req.body.name,
                     });
                     const newcategory = yield Categories_1.default.findById(req.params.category_id);
                     yield Writings_2.default.updateMany({ category_id: req.params.category_id }, { category: newcategory });
                 }
-                const category = yield Categories_1.default.findById(req.params.category_id).select("_id name index count img");
+                const category = yield Categories_1.default.find({
+                    user_id: req.body.user.id,
+                })
+                    .sort({ created_date: 1 })
+                    .select("-user_id  -__v");
                 res.status(200).json({ success: true, data: { category } });
             }
         }
