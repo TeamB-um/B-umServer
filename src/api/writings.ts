@@ -324,6 +324,11 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
     let start_date = new Date(end_date);
     start_date.setDate(end_date.getDate() - 30);
 
+    const month_cnt = await Writings.find({
+      user_id: user_id,
+      created_date: { $gte: start_date, $lte: end_date },
+    }).count();
+
     for (let j = 0; j < categorynumber; j++) {
       //전체 글 중 탐색 중인 카테고리 ID에 해당하고, 한 달 이내에 작성된 글의 개수 count
       const cnt = await Writings.find({
@@ -335,7 +340,7 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
       const index = category[j].index;
 
       //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
-      const percent = Math.floor((cnt / all_cnt) * 100);
+      const percent = Math.floor((cnt / month_cnt) * 100);
       //카테고리 이름을 string 변환해서 name 변수에 저장
       const name = String(category[j].name);
       //카테고리 이름을 key, 글 개수를 value로 저장
