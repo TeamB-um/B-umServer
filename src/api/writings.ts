@@ -106,13 +106,15 @@ router.post(
         const inputcategoryObject = await Categories.findOne({
           _id: req.body.category_id,
         }).select("-__v -user_id");
+        let created_date = getCurrentDate();
+        created_date.setHours(created_date.getHours() + 9);
         if (req.body.iswriting) {
           const newWriting = new Writings({
             title: title,
             text: text,
             user_id: user.id,
             category: inputcategoryObject,
-            created_date: getCurrentDate(),
+            created_date: created_date,
             category_id: req.body.category_id,
           });
           const writingresult = await newWriting.save();
@@ -130,6 +132,7 @@ router.post(
           //두 날짜를 더해서 삭제 예정 날짜를 연산
           //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
           const deleted_date = addDays(created_date, delperiod);
+          created_date.setHours(created_date.getHours() + 9);
           const inputcategoryObject = await Categories.findOne({
             _id: req.body.category_id,
           }).select("-__v -user_id");
@@ -389,12 +392,13 @@ router.delete("/", auth, async (req: Request, res: Response) => {
 
       //현재 날짜를 생성날짜로 정하고
       let created_date = getCurrentDate();
+        
       //user model에서 유통기한을 받아온 뒤
       const delperiod = user.delperiod;
       //두 날짜를 더해서 삭제 예정 날짜를 연산
       //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
       const deleted_date = addDays(created_date, delperiod);
-
+      created_date.setHours(created_date.getHours() + 9);
       const newTrash = new Trashcans({
         title,
         text,

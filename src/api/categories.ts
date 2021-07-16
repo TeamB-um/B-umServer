@@ -66,34 +66,15 @@ router.post(
             .json({ success: false, message: "카테고리 8개 초과" });
         } else {
           const user = await User.findById(req.body.user.id);
-          function getCurrentDate() {
-            var date = new Date();
-            var year = date.getFullYear();
-            var month = date.getMonth();
-            var today = date.getDate();
-            var hours = date.getHours();
-            var minutes = date.getMinutes();
-            var seconds = date.getSeconds();
-            var milliseconds = date.getMilliseconds();
-            return new Date(
-              Date.UTC(
-                year,
-                month,
-                today,
-                hours,
-                minutes,
-                seconds,
-                milliseconds
-              )
-            );
-          }
+          let created_date = getCurrentDate();
+          created_date.setHours(created_date.getHours() + 9);
           const newCategory = new Categories({
             name,
             user_id: user.id,
             index: newindex,
             count: 0,
             img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${newindex}-0.png`,
-            created_date: getCurrentDate(),
+            created_date: created_date
           });
           await newCategory.save();
           const category = await Categories.find({
@@ -179,13 +160,15 @@ router.get(
           { category_id: req.params.category_id },
           { category: newcategory }
         );
+        let created_date = getCurrentDate();
+        created_date.setHours(created_date.getHours() + 9);
         const rewardresult = new Rewards({
           sentence: rewardcheck.sentence,
           context: rewardcheck.context,
           author: rewardcheck.author,
           user_id: req.body.user.id,
           index: category.index,
-          created_date: getCurrentDate(),
+          created_date: created_date,
         });
 
         await rewardresult.save();
@@ -195,7 +178,7 @@ router.get(
           author: rewardresult.author,
           user_id: req.body.user.id,
           index: category.index,
-          created_date: getCurrentDate(),
+          created_date: created_date,
         };
         res.status(200).json({ success: true, data: { reward } });
       } else {
