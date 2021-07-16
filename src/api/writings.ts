@@ -308,7 +308,7 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
 
       const index = category[i].index;
       //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
-      const percent = Math.floor((cnt / all_cnt) * 100);
+      const percent = Math.round((cnt / all_cnt) * 100);
       //카테고리 이름을 string 변환해서 name 변수에 저장
       const name = String(category[i].name);
       //카테고리 이름을 key, 글 개수를 value로 저장
@@ -340,7 +340,7 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
       const index = category[j].index;
 
       //전체 글에서 해당 카테고리가 차지하는 비율 percent 변수에 저장
-      const percent = Math.floor((cnt / month_cnt) * 100);
+      const percent = Math.round((cnt / month_cnt) * 100);
       //카테고리 이름을 string 변환해서 name 변수에 저장
       const name = String(category[j].name);
       //카테고리 이름을 key, 글 개수를 value로 저장
