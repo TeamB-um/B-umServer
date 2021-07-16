@@ -64,59 +64,70 @@ router.post(
             Date.UTC(year, month, today, hours, minutes, seconds, milliseconds)
           );
         }
-
+        let created_date0 = getCurrentDate();
+        created_date0.setHours(created_date0.getHours() + 9);
         const newCategory0 = new Categories({
           name: "취업",
           user_id: user.id,
           index: 0,
           count: 0,
           img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/0-0.png`,
-          created_date: getCurrentDate(),
+          created_date: created_date0
         });
         await newCategory0.save();
+        let created_date1 = getCurrentDate();
+        created_date1.setHours(created_date1.getHours() + 9);
         const newCategory1 = new Categories({
           name: "학업",
           user_id: user.id,
           index: 1,
           count: 0,
           img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/1-0.png`,
-          created_date: getCurrentDate(),
+          created_date: created_date1,
         });
         await newCategory1.save();
+        let created_date2 = getCurrentDate();
+        created_date2.setHours(created_date2.getHours() + 9);
         const newCategory2 = new Categories({
           name: "인간관계",
           user_id: user.id,
           index: 2,
           count: 0,
           img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/2-0.png`,
-          created_date: getCurrentDate(),
+          created_date: created_date2,
         });
         await newCategory2.save();
+        let created_date3 = getCurrentDate();
+        created_date3.setHours(created_date3.getHours() + 9);
         const newCategory3 = new Categories({
           name: "건강",
           user_id: user.id,
           index: 3,
           count: 0,
           img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/3-0.png`,
-          created_date: getCurrentDate(),
+          created_date: created_date3,
         });
         await newCategory3.save();
+        let created_date4 = getCurrentDate();
+        created_date4.setHours(created_date4.getHours() + 9);
         const newCategory4 = new Categories({
           name: "금전",
           user_id: user.id,
           index: 4,
           count: 0,
           img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/4-0.png`,
-          created_date: getCurrentDate(),
+          created_date: created_date4
         });
         await newCategory4.save();
+        let created_date5 = getCurrentDate();
+        created_date5.setHours(created_date5.getHours() + 9);
         const newCategory5 = new Categories({
           name: "개인",
           user_id: user.id,
           index: 5,
           count: 0,
           img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/5-0.png`,
-          created_date: getCurrentDate(),
+          created_date: created_date5
         });
         await newCategory5.save();
         const payload = {
