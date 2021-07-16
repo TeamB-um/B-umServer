@@ -38,9 +38,9 @@ router.get("/", auth, async (req: Request, res: Response) => {
     for (let i = 0; i < trashcount; i++) {
       const current: Date = getCurrentDate();
       current.setHours(current.getHours() + 9);
-      const d_day = (trashcans[i].created_date.getTime() - current.getTime()) / 86400000;
-      console.log(trashcans[i].created_date);
-      console.log(current);
+      const deleted_date = trashcans[i].created_date;
+      deleted_date.setDate(deleted_date.getDate() + Number(trashcans[i].delperiod));
+      const d_day = (deleted_date.getTime() - current.getTime()) / 86400000;
       const object = {
         _id: trashcans[i].id,
         title: trashcans[i].title,

@@ -17,6 +17,7 @@ export interface ITrashcansDTO {
   user_id: mongoose.Types.ObjectId;
   delperiod: Number;
   created_date: Date;
+  deleted_date: Date;
   category: Object;
   d_day: Number;
 }
