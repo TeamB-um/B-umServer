@@ -68,6 +68,7 @@ router.post(
           const user = await User.findById(req.body.user.id);
           let created_date = getCurrentDate();
           created_date.setHours(created_date.getHours() + 9);
+          console.log(created_date);
           const newCategory = new Categories({
             name,
             user_id: user.id,
