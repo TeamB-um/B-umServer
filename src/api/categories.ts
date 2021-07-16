@@ -42,7 +42,10 @@ router.post(
       return res.status(400).json({ success: false, errors: errors.array() });
     }
     const name = req.body.name;
-    const checkname = await Categories.findOne({ name });
+    const checkname = await Categories.findOne({
+      user_id: req.body.user.id,
+      name: req.body.name,
+    });
     if (checkname) {
       res.status(409).json({ success: false, message: "중복된 이름 존재" });
     } else {
@@ -74,7 +77,7 @@ router.post(
             index: newindex,
             count: 0,
             img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${newindex}-0.png`,
-            created_date: created_date
+            created_date: created_date,
           });
           await newCategory.save();
           const category = await Categories.find({
@@ -246,12 +249,12 @@ router.patch("/:category_id", auth, async (req: Request, res: Response) => {
       user_id: req.body.user.id,
     });
     if (categorycheck[0]) {
-      const check = await Categories.findOne({
+      const check = await Categories.find({
         user_id: req.body.user.id,
         name: req.body.name,
       });
 
-      if (check) {
+      if (check[0]) {
         res.status(409).json({ success: false, message: "중복된 이름 존재" });
       } else {
         if (req.body.name !== null) {
