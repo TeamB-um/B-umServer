@@ -82,7 +82,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
   try {
     const rewards = await Rewards.find({ user_id: req.body.user.id }).select(
       "-__v"
-    );
+    ).sort({created_date : -1});
 
     if (!rewards) {
       return res.status(404).json({ success: false, message: "리워드가 없음" });

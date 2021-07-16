@@ -22,10 +22,14 @@ const TrashcansSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  created_date: {
+  deleted_date: {
     type: Date,
     //created_date가 될 시 1분 후 해당 문서 삭제
     expires: 60,
+  },
+  created_date : {
+    type :Date,
+    required : true
   },
   category: {
     type: Object,

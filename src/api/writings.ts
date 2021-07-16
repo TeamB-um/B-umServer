@@ -118,7 +118,7 @@ router.post(
           const writingresult = await newWriting.save();
           const writing = await Writings.find({
             user_id: req.body.user.id,
-          }).select("-__v -category_id -category.__v -category.user_id");
+          }).select("-__v -category_id -category.__v -category.user_id").sort({ created_date: -1 });
           res.status(201).json({ success: true, data: { writing } });
         } else {
           //현재 날짜를 생성날짜로 정하고
@@ -129,7 +129,7 @@ router.post(
           console.log(user.delperiod);
           //두 날짜를 더해서 삭제 예정 날짜를 연산
           //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
-          created_date = addDays(created_date, delperiod);
+          const deleted_date = addDays(created_date, delperiod);
           const inputcategoryObject = await Categories.findOne({
             _id: req.body.category_id,
           }).select("-__v -user_id");
@@ -138,7 +138,8 @@ router.post(
             text: text,
             user_id: user.id,
             category: inputcategoryObject,
-            created_date: created_date,
+            deleted_date: deleted_date,
+            created_date : created_date,
             category_id: req.body.category_id,
             delperiod: user.delperiod,
           });
@@ -146,7 +147,7 @@ router.post(
           const trashresult = await newTrash.save();
           const writing = await Trashcans.find({
             user_id: req.body.user.id,
-          }).select("-__v -category_id -category.__v -category.user_id");
+          }).select("-__v -category_id -category.__v -category.user_id").sort({ created_date: -1 });
           res.status(201).json({ success: true, data: { writing } });
         }
       } catch (err) {
@@ -392,13 +393,14 @@ router.delete("/", auth, async (req: Request, res: Response) => {
       const delperiod = user.delperiod;
       //두 날짜를 더해서 삭제 예정 날짜를 연산
       //models expire 설정에 따라 해당 날짜가 되면 1분 경과 후 삭제
-      created_date = addDays(created_date, delperiod);
+      const deleted_date = addDays(created_date, delperiod);
 
       const newTrash = new Trashcans({
         title,
         text,
         user_id,
         delperiod,
+        deleted_date,
         created_date,
         category,
       });
@@ -410,7 +412,7 @@ router.delete("/", auth, async (req: Request, res: Response) => {
     });
     const writing = await Writings.find({
       user_id: req.body.user.id,
-    }).select("-__v -category_id -category.__v");
+    }).select("-__v -category_id -category.__v").sort({ created_date: -1 });
     res.status(200).json({ success: true, data: { writing } });
   } catch (err) {
     console.error(err.message);

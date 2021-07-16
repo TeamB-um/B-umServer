@@ -49,7 +49,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         d_day: Math.round(d_day),
       };
       trashresult.push(object);
-    }
+    };
     if (!trashcans[0]) {
       return res
         .status(404)
