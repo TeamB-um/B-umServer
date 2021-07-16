@@ -324,6 +324,7 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
     var month_dicObject = [];
     //현재 날짜
     const end_date = getCurrentDate();
+    end_date.setHours(end_date.getHours() + 9);
     //한달 전 날짜
     let start_date = new Date(end_date);
     start_date.setDate(end_date.getDate() - 30);
