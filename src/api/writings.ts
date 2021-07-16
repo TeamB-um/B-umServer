@@ -147,7 +147,7 @@ router.post(
           const trashresult = await newTrash.save();
           const writing = await Trashcans.find({
             user_id: req.body.user.id,
-          }).select("-__v -category_id -category.__v -category.user_id").sort({ created_date: -1 });
+          }).select("-__v -category_id -category.__v -category.user_id -deleted_date").sort({ created_date: -1 });
           res.status(201).json({ success: true, data: { writing } });
         }
       } catch (err) {
