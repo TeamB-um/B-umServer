@@ -28,6 +28,15 @@ const WritingsSchema = new mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     ref: "Categories",
   },
+  category_name : {
+    type : String,
+    required : true
+  },
+
+  paper : {
+    type : Number,
+    requied : true,
+  }
 });
 
 export default mongoose.model<IWritings & mongoose.Document>(

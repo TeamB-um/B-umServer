@@ -11,9 +11,8 @@ app.use(express.json());
 app.use("/users", require("./api/users"));
 app.use("/categories", require("./api/categories"));
 app.use("/writings", require("./api/writings"));
-app.use("/trashcans", require("./api/trashcans"));
 app.use("/rewards", require("./api/rewards"));
-
+app.use("/presents", require("./api/presents"));
 // error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development

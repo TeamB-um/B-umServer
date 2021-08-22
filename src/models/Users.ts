@@ -6,20 +6,25 @@ const UsersSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
   ispush: {
     type: Boolean,
     required: true,
   },
-  delperiod: {
-    type: Number,
-    required: true,
-  },
-  seq: {
+  rewardseq: {
     type: Number,
     required: true,
     default: 1,
   },
+  presentseq: {
+    type: Number,
+    required : true,
+    default :1
+  },
+  devicetoken : {
+    type : String,
+    required : true
+  }
+
 });
 
 export default mongoose.model<IUsers & mongoose.Document>("Users", UsersSchema);

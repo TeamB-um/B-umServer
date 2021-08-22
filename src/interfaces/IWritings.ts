@@ -7,6 +7,8 @@ export interface IWritings {
   category_id: mongoose.Types.ObjectId;
   category: Object;
   created_date: Date;
+  category_name : String;
+  paper : Number;
 }
 
 export interface InputWritingsDTO {

@@ -24,6 +24,7 @@ router.post(
       return res.status(400).json({ success: false, errors: errors.array() });
     }
     const device_id = req.body.device_id;
+    const devicetoken = req.body.devicetoken;
     try {
       let user = await User.findOne({ device_id });
       if (user) {
@@ -43,11 +44,10 @@ router.post(
         );
       } else {
         let ispush = true;
-        let delperiod = 3;
         user = new User({
           device_id,
           ispush,
-          delperiod,
+          devicetoken,
         });
         await user.save();
 
@@ -65,7 +65,6 @@ router.post(
           );
         }
         let created_date0 = getCurrentDate();
-        created_date0.setHours(created_date0.getHours() + 9);
         const newCategory0 = new Categories({
           name: "취업",
           user_id: user.id,
@@ -76,7 +75,6 @@ router.post(
         });
         await newCategory0.save();
         let created_date1 = getCurrentDate();
-        created_date1.setHours(created_date1.getHours() + 9);
         const newCategory1 = new Categories({
           name: "학업",
           user_id: user.id,
@@ -87,7 +85,6 @@ router.post(
         });
         await newCategory1.save();
         let created_date2 = getCurrentDate();
-        created_date2.setHours(created_date2.getHours() + 9);
         const newCategory2 = new Categories({
           name: "인간관계",
           user_id: user.id,
@@ -98,7 +95,6 @@ router.post(
         });
         await newCategory2.save();
         let created_date3 = getCurrentDate();
-        created_date3.setHours(created_date3.getHours() + 9);
         const newCategory3 = new Categories({
           name: "건강",
           user_id: user.id,
@@ -109,7 +105,6 @@ router.post(
         });
         await newCategory3.save();
         let created_date4 = getCurrentDate();
-        created_date4.setHours(created_date4.getHours() + 9);
         const newCategory4 = new Categories({
           name: "금전",
           user_id: user.id,
@@ -120,7 +115,6 @@ router.post(
         });
         await newCategory4.save();
         let created_date5 = getCurrentDate();
-        created_date5.setHours(created_date5.getHours() + 9);
         const newCategory5 = new Categories({
           name: "개인",
           user_id: user.id,

@@ -6,9 +6,8 @@ import auth from "../middleware/auth";
 import Categories from "../models/Categories";
 import RewardDummy from "../models/Rewards_dummy";
 import Rewards from "../models/Rewards";
-import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "node:constants";
 import Writings from "../models/Writings";
-import Trashcans from "../models/Trashcans";
+
 
 const router = Router();
 
@@ -133,9 +132,9 @@ router.get(
           _id: req.body.user.id,
         });
 
-        const newseq = Number(user.seq) + 1;
+        const newseq = Number(user.rewardseq) + 1;
         const rewardcheck = await RewardDummy.findOne({
-          seq: user.seq,
+          seq: user.rewardseq,
         }).select("-__v -seq");
         await User.findOneAndUpdate(
           {
@@ -210,9 +209,6 @@ router.delete("/:category_id", auth, async (req: Request, res: Response) => {
     });
     if (categorycheck[0]) {
       await Posts.deleteMany({
-        category_id: category_id,
-      });
-      await Trashcans.deleteMany({
         category_id: category_id,
       });
       await Categories.deleteOne({
