@@ -156,7 +156,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         })
-          .select("-__v -category_id -category.__v -category.user_id")
+          .select("-__v -category_id -category.__v -category.user_id -category_name")
           .sort({ created_date: -1 });
         if (writing.length != 0) {
           res.status(200).json({ success: true, data: { writing } });
@@ -170,7 +170,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
           user_id: user_id,
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
         })
-          .select("-__v -category_id -category.__v -category.user_id")
+          .select("-__v -category_id -category.__v -category.user_id -category_name")
           .sort({ created_date: -1 });
         if (writing.length != 0) {
           res.status(200).json({ success: true, data: { writing } });
@@ -186,7 +186,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
           user_id: user_id,
           category_id: { $in: category_real_list },
         })
-          .select("-__v -category_id -category.__v -category.user_id")
+          .select("-__v -category_id -category.__v -category.user_id -category_name")
           .sort({ created_date: -1 });
         if (writing.length != 0) {
           res.status(200).json({ success: true, data: { writing } });
@@ -199,7 +199,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writing = await Writing.find({
           user_id: { $eq: user_id },
         })
-          .select("-__v -category_id -category.__v -category.user_id")
+          .select("-__v -category_id -category.__v -category.user_id -category_name")
           .sort({ created_date: -1 });
         if (writing.length != 0) {
           res.status(200).json({ success: true, data: { writing } });
@@ -266,6 +266,8 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
       { $sort: { percent: -1 } },
     ])
     console.log(allstat)
+
+
 
     const end_date = getCurrentDate();
     console.log(end_date);
