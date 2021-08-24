@@ -16,7 +16,9 @@ const router = Router();
 
 router.post(
   "/",
-  [check("device_id", "id is required").not().isEmpty()],
+  [check("device_id", "id is required").not().isEmpty()
+  check("devicetoken", "push token is required").not().isEmpty()
+  ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
 
