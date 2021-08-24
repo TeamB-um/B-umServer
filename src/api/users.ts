@@ -47,9 +47,9 @@ router.post(
       } else {
         let ispush = true;
         user = new User({
-          device_id,
-          ispush,
-          devicetoken,
+          device_id = device_id,
+          ispush = ispush,
+          devicetoken = devicetoken,
         });
         await user.save();
 
