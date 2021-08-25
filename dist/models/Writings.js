@@ -31,6 +31,14 @@ const WritingsSchema = new mongoose_1.default.Schema({
         type: mongoose_1.default.SchemaTypes.ObjectId,
         ref: "Categories",
     },
+    category_name: {
+        type: String,
+        required: true
+    },
+    paper: {
+        type: Number,
+        requied: true,
+    }
 });
 exports.default = mongoose_1.default.model("Writings", WritingsSchema);
 //# sourceMappingURL=Writings.js.map

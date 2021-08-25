@@ -77,8 +77,10 @@ router.get("/dummy", (req, res) => __awaiter(void 0, void 0, void 0, function* (
 }));
 router.get("/", auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const rewards = yield Rewards_1.default.find({ user_id: req.body.user.id }).select("-__v");
-        if (!rewards) {
+        const rewards = yield Rewards_1.default.find({ user_id: req.body.user.id })
+            .select("-__v")
+            .sort({ created_date: -1 });
+        if (!rewards[0]) {
             return res.status(404).json({ success: false, message: "리워드가 없음" });
         }
         res.status(200).json({ success: true, data: { rewards } });

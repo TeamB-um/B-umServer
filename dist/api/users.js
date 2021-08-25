@@ -25,12 +25,14 @@ const router = express_1.Router();
  *  @desc Create a user
  *  @access Public
  */
-router.post("/", [express_validator_1.check("device_id", "id is required").not().isEmpty()], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", [express_validator_1.check("device_id", "id is required").not().isEmpty(),
+], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ success: false, errors: errors.array() });
     }
     const device_id = req.body.device_id;
+    //const devicetoken = req.body.devicetoken;
     try {
         let user = yield Users_1.default.findOne({ device_id });
         if (user) {
@@ -47,11 +49,10 @@ router.post("/", [express_validator_1.check("device_id", "id is required").not()
         }
         else {
             let ispush = true;
-            let delperiod = 3;
             user = new Users_1.default({
                 device_id,
                 ispush,
-                delperiod,
+                //devicetoken,
             });
             yield user.save();
             function getCurrentDate() {
@@ -65,58 +66,64 @@ router.post("/", [express_validator_1.check("device_id", "id is required").not()
                 var milliseconds = date.getMilliseconds();
                 return new Date(Date.UTC(year, month, today, hours, minutes, seconds, milliseconds));
             }
+            let created_date0 = getCurrentDate();
             const newCategory0 = new Categories_1.default({
                 name: "취업",
                 user_id: user.id,
                 index: 0,
                 count: 0,
                 img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/0-0.png`,
-                created_date: getCurrentDate(),
+                created_date: created_date0
             });
             yield newCategory0.save();
+            let created_date1 = getCurrentDate();
             const newCategory1 = new Categories_1.default({
                 name: "학업",
                 user_id: user.id,
                 index: 1,
                 count: 0,
                 img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/1-0.png`,
-                created_date: getCurrentDate(),
+                created_date: created_date1,
             });
             yield newCategory1.save();
+            let created_date2 = getCurrentDate();
             const newCategory2 = new Categories_1.default({
                 name: "인간관계",
                 user_id: user.id,
                 index: 2,
                 count: 0,
                 img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/2-0.png`,
-                created_date: getCurrentDate(),
+                created_date: created_date2,
             });
             yield newCategory2.save();
+            let created_date3 = getCurrentDate();
             const newCategory3 = new Categories_1.default({
                 name: "건강",
                 user_id: user.id,
                 index: 3,
                 count: 0,
                 img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/3-0.png`,
-                created_date: getCurrentDate(),
+                created_date: created_date3,
             });
             yield newCategory3.save();
+            let created_date4 = getCurrentDate();
             const newCategory4 = new Categories_1.default({
                 name: "금전",
                 user_id: user.id,
                 index: 4,
                 count: 0,
                 img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/4-0.png`,
-                created_date: getCurrentDate(),
+                created_date: created_date4
             });
             yield newCategory4.save();
+            let created_date5 = getCurrentDate();
             const newCategory5 = new Categories_1.default({
                 name: "개인",
                 user_id: user.id,
                 index: 5,
                 count: 0,
                 img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/5-0.png`,
-                created_date: getCurrentDate(),
+                created_date: created_date5
             });
             yield newCategory5.save();
             const payload = {

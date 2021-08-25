@@ -21,7 +21,6 @@ const Categories_1 = __importDefault(require("../models/Categories"));
 const Rewards_dummy_1 = __importDefault(require("../models/Rewards_dummy"));
 const Rewards_1 = __importDefault(require("../models/Rewards"));
 const Writings_2 = __importDefault(require("../models/Writings"));
-const Trashcans_1 = __importDefault(require("../models/Trashcans"));
 const router = express_1.Router();
 function getCurrentDate() {
     var date = new Date();
@@ -45,7 +44,10 @@ router.post("/", auth_1.default, [express_validator_1.check("name", "name is req
         return res.status(400).json({ success: false, errors: errors.array() });
     }
     const name = req.body.name;
-    const checkname = yield Categories_1.default.findOne({ name });
+    const checkname = yield Categories_1.default.findOne({
+        user_id: req.body.user.id,
+        name: req.body.name,
+    });
     if (checkname) {
         res.status(409).json({ success: false, message: "중복된 이름 존재" });
     }
@@ -71,24 +73,15 @@ router.post("/", auth_1.default, [express_validator_1.check("name", "name is req
             }
             else {
                 const user = yield Users_1.default.findById(req.body.user.id);
-                function getCurrentDate() {
-                    var date = new Date();
-                    var year = date.getFullYear();
-                    var month = date.getMonth();
-                    var today = date.getDate();
-                    var hours = date.getHours();
-                    var minutes = date.getMinutes();
-                    var seconds = date.getSeconds();
-                    var milliseconds = date.getMilliseconds();
-                    return new Date(Date.UTC(year, month, today, hours, minutes, seconds, milliseconds));
-                }
+                let created_date = getCurrentDate();
+                created_date.setHours(created_date.getHours() + 9);
                 const newCategory = new Categories_1.default({
                     name,
                     user_id: user.id,
                     index: newindex,
                     count: 0,
                     img: `https://soptseminar5test.s3.ap-northeast-2.amazonaws.com/${newindex}-0.png`,
-                    created_date: getCurrentDate(),
+                    created_date: created_date,
                 });
                 yield newCategory.save();
                 const category = yield Categories_1.default.find({
@@ -138,9 +131,9 @@ router.get("/:category_id/rewards", auth_1.default, (req, res) => __awaiter(void
             const user = yield Users_1.default.findOne({
                 _id: req.body.user.id,
             });
-            const newseq = Number(user.seq) + 1;
+            const newseq = Number(user.rewardseq) + 1;
             const rewardcheck = yield Rewards_dummy_1.default.findOne({
-                seq: user.seq,
+                seq: user.rewardseq,
             }).select("-__v -seq");
             yield Users_1.default.findOneAndUpdate({
                 _id: req.body.user.id,
@@ -159,13 +152,15 @@ router.get("/:category_id/rewards", auth_1.default, (req, res) => __awaiter(void
             });
             const newcategory = yield Categories_1.default.findById(req.params.category_id);
             yield Writings_2.default.updateMany({ category_id: req.params.category_id }, { category: newcategory });
+            let created_date = getCurrentDate();
+            created_date.setHours(created_date.getHours() + 9);
             const rewardresult = new Rewards_1.default({
                 sentence: rewardcheck.sentence,
                 context: rewardcheck.context,
                 author: rewardcheck.author,
                 user_id: req.body.user.id,
                 index: category.index,
-                created_date: getCurrentDate(),
+                created_date: created_date,
             });
             yield rewardresult.save();
             const reward = {
@@ -174,7 +169,7 @@ router.get("/:category_id/rewards", auth_1.default, (req, res) => __awaiter(void
                 author: rewardresult.author,
                 user_id: req.body.user.id,
                 index: category.index,
-                created_date: getCurrentDate(),
+                created_date: created_date,
             };
             res.status(200).json({ success: true, data: { reward } });
         }
@@ -203,9 +198,6 @@ router.delete("/:category_id", auth_1.default, (req, res) => __awaiter(void 0, v
         });
         if (categorycheck[0]) {
             yield Writings_1.default.deleteMany({
-                category_id: category_id,
-            });
-            yield Trashcans_1.default.deleteMany({
                 category_id: category_id,
             });
             yield Categories_1.default.deleteOne({
@@ -242,11 +234,11 @@ router.patch("/:category_id", auth_1.default, (req, res) => __awaiter(void 0, vo
             user_id: req.body.user.id,
         });
         if (categorycheck[0]) {
-            const check = yield Categories_1.default.findOne({
+            const check = yield Categories_1.default.find({
                 user_id: req.body.user.id,
                 name: req.body.name,
             });
-            if (check) {
+            if (check[0]) {
                 res.status(409).json({ success: false, message: "중복된 이름 존재" });
             }
             else {

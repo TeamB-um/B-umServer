@@ -6,7 +6,7 @@ const schedule = require("node-schedule");
 const admin = require('firebase-admin');
 const rule = new schedule.RecurrenceRule();
 import Pushtoken from "./models/Pushtokens";
-let serviceAccount = require('./bium-sever-firebase-adminsdk-y6tzj-9f976cbf9b.json'); 
+let serviceAccount = require('../bium-sever-firebase-adminsdk-y6tzj-9f976cbf9b.json'); 
 rule.tz = "Asia/Seoul";
 rule.hour = 15;
 rule.minute = 55;

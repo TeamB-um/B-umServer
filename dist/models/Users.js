@@ -13,15 +13,20 @@ const UsersSchema = new mongoose_1.default.Schema({
         type: Boolean,
         required: true,
     },
-    delperiod: {
-        type: Number,
-        required: true,
-    },
-    seq: {
+    rewardseq: {
         type: Number,
         required: true,
         default: 1,
     },
+    presentseq: {
+        type: Number,
+        required: true,
+        default: 1
+    },
+    // devicetoken : {
+    //   type : String,
+    //   required : true
+    // }
 });
 exports.default = mongoose_1.default.model("Users", UsersSchema);
 //# sourceMappingURL=Users.js.map
