@@ -134,10 +134,19 @@ router.get("/", auth, async (req: Request, res: Response) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
-  console.log(typeof req.query.start_date);
-  console.log(req.query.start_date);
   let start_date = req.query.start_date;
   let end_date = req.query.end_date;
+  let offset = req.query.offset;
+
+  offset = String(offset);
+  let offsetnum = Number(offset);
+  if(req.query.offset == null)
+  {
+    offsetnum = 10
+  }
+  let page = req.query.page;
+  page = String(page);
+  let pagenum = Number(page);
   let category = String(req.query.category_ids)
     .replace("[", "")
     .replace("]", "");
@@ -147,19 +156,21 @@ router.get("/", auth, async (req: Request, res: Response) => {
   Date_end_date.setDate(Date_end_date.getDate() + 1);
 
   const user_id = req.body.user.id;
-  console.log(category_real_list);
   try {
     if (start_date) {
       if (req.query.category_ids) {
+        const count = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list },
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        }).count();
         const writing = await Writing.find({
           user_id: user_id,
           category_id: { $in: category_real_list },
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        })
-          .select("-__v -category_id -category.__v -category.user_id -category_name")
-          .sort({ created_date: -1 });
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
         if (writing.length != 0) {
-          res.status(200).json({ success: true, data: { writing } });
+          res.status(200).json({ success: true, data: { writing, count } });
         } else {
           res
             .status(404)
@@ -169,11 +180,13 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writing = await Writing.find({
           user_id: user_id,
           created_date: { $gte: Date_start_date, $lte: Date_end_date },
-        })
-          .select("-__v -category_id -category.__v -category.user_id -category_name")
-          .sort({ created_date: -1 });
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
+        const count = await Writing.find({
+          user_id: user_id,
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        }).count();
         if (writing.length != 0) {
-          res.status(200).json({ success: true, data: { writing } });
+          res.status(200).json({ success: true, data: { writing, count } });
         } else {
           res
             .status(404)
@@ -185,11 +198,13 @@ router.get("/", auth, async (req: Request, res: Response) => {
         const writing = await Writing.find({
           user_id: user_id,
           category_id: { $in: category_real_list },
-        })
-          .select("-__v -category_id -category.__v -category.user_id -category_name")
-          .sort({ created_date: -1 });
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
+        const count = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list }
+        }).count();
         if (writing.length != 0) {
-          res.status(200).json({ success: true, data: { writing } });
+          res.status(200).json({ success: true, data: { writing,count } });
         } else {
           res
             .status(404)
@@ -198,11 +213,14 @@ router.get("/", auth, async (req: Request, res: Response) => {
       } else {
         const writing = await Writing.find({
           user_id: { $eq: user_id },
-        })
-          .select("-__v -category_id -category.__v -category.user_id -category_name")
-          .sort({ created_date: -1 });
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
+      
+        const count = await Writing.find({
+          user_id: user_id,
+
+        }).count();
         if (writing.length != 0) {
-          res.status(200).json({ success: true, data: { writing } });
+          res.status(200).json({ success: true, data: { writing,count } });
         } else {
           res
             .status(404)
@@ -265,12 +283,11 @@ router.get("/stat/graph", auth, async (req: Request, res: Response) => {
       }},
       { $sort: { percent: -1 } },
     ])
-    console.log(allstat)
 
 
 
     const end_date = getCurrentDate();
-    console.log(end_date);
+  
     let start_date = new Date(end_date);
     
     start_date.setDate(end_date.getDate() - 30);

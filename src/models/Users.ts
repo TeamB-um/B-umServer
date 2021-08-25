@@ -20,10 +20,10 @@ const UsersSchema = new mongoose.Schema({
     required : true,
     default :1
   },
-  devicetoken : {
-    type : String,
-    required : true
-  }
+  // devicetoken : {
+  //   type : String,
+  //   required : true
+  // }
 
 });
 
