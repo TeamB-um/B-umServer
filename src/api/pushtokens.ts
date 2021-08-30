@@ -9,10 +9,14 @@ const router = Router();
 router.post("/",  async (req: Request, res: Response) => {
     try {
       const pushtoken = req.body.pushtoken
-      const tokenarray = new Pushtokens ({
+      let user = await Pushtokens.findOne({ token : pushtoken });
+      if(!user)
+      {
+        const tokenarray = new Pushtokens ({
           token : pushtoken
-      });
-      await tokenarray.save();
+        });
+        await tokenarray.save();
+      }
       res.status(201).json({ success: true });
     } catch (error) {
       console.error(error.message);
