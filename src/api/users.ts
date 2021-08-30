@@ -155,7 +155,7 @@ router.post(
 router.get("/", auth, async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.body.user.id).select(
-      "-device_id -_id -__v -seq"
+      "-device_id -_id -__v -presentseq -rewardseq"
     );
 
     if (!user) {

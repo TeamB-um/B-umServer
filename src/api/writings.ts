@@ -37,7 +37,7 @@ router.post(
     check("category_id", "category_id is required").not().isEmpty(),
     check("text", "text is required").not().isEmpty(),
     check("iswriting", "iswriting is required").not().isEmpty(),
-    check("paper","paper is required").not().isEmpty()
+  //  check("paper","paper is required").not().isEmpty()
   ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -337,15 +337,105 @@ router.delete("/", auth, async (req: Request, res: Response) => {
   }
   const writing_ids = String(req.query.ids).replace("[", "").replace("]", "");
   const id_list = writing_ids.split(",");
+
+  await Writing.deleteMany({
+    _id: { $in: id_list },
+  });
+  let start_date = req.query.start_date;
+  let end_date = req.query.end_date;
+  let offset = req.query.offset;
+
+  offset = String(offset);
+  let offsetnum = Number(offset);
+  if(req.query.offset == null)
+  {
+    offsetnum = 10
+  }
+  let page = req.query.page;
+  page = String(page);
+  let pagenum = Number(page);
+  let category = String(req.query.category_ids)
+    .replace("[", "")
+    .replace("]", "");
+  const category_real_list = category.split(",");
+  const Date_start_date = new Date(String(start_date));
+  const Date_end_date = new Date(String(end_date));
+  Date_end_date.setDate(Date_end_date.getDate() + 1);
+  const user_id = req.body.user.id;
   try {
-    await Writing.deleteMany({
-      _id: { $in: id_list },
-    });
-    const writing = await Writings.find({
-      user_id: req.body.user.id,
-    }).select("-__v -category_id -category.__v").sort({ created_date: -1 });
-    res.status(200).json({ success: true, data: { writing } });
-  } catch (err) {
+    if (start_date) {
+      if (req.query.category_ids) {
+        const count = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list },
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        }).count();
+        const writing = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list },
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
+        } else {
+          res
+            .status(404)
+            .json({ success: false, message: "해당 필터 결과가 없습니다. " });
+        }
+      } else {
+        const writing = await Writing.find({
+          user_id: user_id,
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
+        const count = await Writing.find({
+          user_id: user_id,
+          created_date: { $gte: Date_start_date, $lte: Date_end_date },
+        }).count();
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
+        } else {
+          res
+            .status(404)
+            .json({ success: false, message: "해당 필터 결과가 없습니다." });
+        }
+      }
+    } else {
+      if (req.query.category_ids) {
+        const writing = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list },
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
+        const count = await Writing.find({
+          user_id: user_id,
+          category_id: { $in: category_real_list }
+        }).count();
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
+        } else {
+          res
+            .status(404)
+            .json({ success: false, message: "해당 필터 결과가 없습니다." });
+        }
+      } else {
+        const writing = await Writing.find({
+          user_id: { $eq: user_id },
+        }).sort({ created_date: -1 }).skip(offsetnum*(pagenum-1)).limit(offsetnum).select("-__v -category_id -category.__v -category.user_id -category_name");
+      
+        const count = await Writing.find({
+          user_id: user_id,
+
+        }).count();
+        if (writing.length != 0) {
+          res.status(200).json({ success: true, data: { writing } });
+        } else {
+          res
+            .status(404)
+            .json({ success: false, message: "해당 필터 결과가 없습니다." });
+        }
+      }
+    }
+  }
+  catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: "서버 오류" });
   }

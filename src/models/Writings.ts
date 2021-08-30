@@ -36,6 +36,7 @@ const WritingsSchema = new mongoose.Schema({
   paper : {
     type : Number,
     requied : true,
+    default : 1
   }
 });
 
