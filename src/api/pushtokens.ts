@@ -9,14 +9,13 @@ const router = Router();
 router.post("/",  async (req: Request, res: Response) => {
     try {
       const pushtoken = req.body.pushtoken
-      let user = await Pushtokens.findOne({ token : pushtoken });
-      if(!user)
-      {
-        const tokenarray = new Pushtokens ({
-          token : pushtoken
-        });
-        await tokenarray.save();
-      }
+  
+      await Pushtokens.updateOne(
+        { token : pushtoken},
+        { $set : { token : pushtoken}},
+        {upsert : true},
+      )
+      
       res.status(201).json({ success: true });
     } catch (error) {
       console.error(error.message);
