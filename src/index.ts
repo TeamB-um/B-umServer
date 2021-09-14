@@ -3,13 +3,13 @@ const app = express();
 import connectDB from "./Loaders/db";
 import Users from "./models/Users";
 const schedule = require("node-schedule");
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
 const rule = new schedule.RecurrenceRule();
 import Pushtoken from "./models/Pushtokens";
-let serviceAccount = require('../bium-sever-firebase-adminsdk-y6tzj-9f976cbf9b.json'); 
+let serviceAccount = require("../bium-sever-firebase-adminsdk-y6tzj-9f976cbf9b.json");
 rule.tz = "Asia/Seoul";
-rule.hour = 15;
-rule.minute = 55;
+rule.hour = 17;
+rule.minute = 10;
 rule.second = 0;
 
 // Connect Database
@@ -23,47 +23,42 @@ app.use("/categories", require("./api/categories"));
 app.use("/writings", require("./api/writings"));
 app.use("/rewards", require("./api/rewards"));
 app.use("/presents", require("./api/presents"));
-app.use("/pushtokens",require("./api/pushtokens"));
-
-
+app.use("/pushtokens", require("./api/pushtokens"));
 
 schedule.scheduleJob(rule, async () => {
-    try {
-        if(!admin.apps.length) {
-            admin.initializeApp({
-                 credential: admin.credential.cert(serviceAccount) 
-                });
-        }
-  
-        const pushtoken = await Pushtoken.find();
-        console.log(pushtoken[0].token);
-        const result = [];
-        for (let i = 0; i < pushtoken.length; ++i) {
-            result.push(pushtoken[i].token)
-        }  
-        console.log(result);
-        let message = {
-            notification: {
-              title: '깜짝 선물을 발견했어요!',
-              body: '미화원이 휴지통 속에서 무언가 발견했어요! 확인해볼까요?',
-            },
-        } 
-        admin
-        .messaging()
-        .sendToDevice(result,message)
-        .then(function (response) {
-          console.log('Successfully sent message: : ', response);
-        })
-        .catch(function (err) {
-           console.log('Error Sending message!!! : ', err);
-        });
-    }catch(err){
-        console.log(err);
+  try {
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
     }
+
+    const pushtoken = await Pushtoken.find();
+    console.log(pushtoken[0].token);
+    const result = [];
+    for (let i = 0; i < pushtoken.length; ++i) {
+      result.push(pushtoken[i].token);
+    }
+    console.log(result);
+    let message = {
+      notification: {
+        title: "깜짝 선물을 발견했어요!",
+        body: "미화원이 휴지통 속에서 무언가 발견했어요! 확인해볼까요?",
+      },
+    };
+    admin
+      .messaging()
+      .sendToDevice(result, message)
+      .then(function (response) {
+        console.log("Successfully sent message: : ", response);
+      })
+      .catch(function (err) {
+        console.log("Error Sending message!!! : ", err);
+      });
+  } catch (err) {
+    console.log(err);
+  }
 });
-
-
-
 
 // error handler
 app.use(function (err, req, res, next) {
