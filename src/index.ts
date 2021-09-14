@@ -9,7 +9,7 @@ import Pushtoken from "./models/Pushtokens";
 let serviceAccount = require("../bium-sever-firebase-adminsdk-y6tzj-9f976cbf9b.json");
 rule.tz = "Asia/Seoul";
 rule.hour = 17;
-rule.minute = 10;
+rule.minute = 15;
 rule.second = 0;
 
 // Connect Database
