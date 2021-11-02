@@ -8,9 +8,9 @@ const rule = new schedule.RecurrenceRule();
 import Pushtoken from "./models/Pushtokens";
 let serviceAccount = require('../bium-sever-firebase-adminsdk-y6tzj-9f976cbf9b.json'); 
 rule.tz = "Asia/Seoul";
-rule.hour = 15;
-rule.minute = 55;
-rule.second = 0;
+rule.hour = 20;
+rule.minute = 47;
+rule.second = 10;
 
 // Connect Database
 connectDB();
@@ -34,7 +34,7 @@ schedule.scheduleJob(rule, async () => {
                  credential: admin.credential.cert(serviceAccount) 
                 });
         }
-  
+        console.log("aaa")
         const pushtoken = await Pushtoken.find();
         console.log(pushtoken[0].token);
         const result = [];

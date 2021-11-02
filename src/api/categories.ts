@@ -141,7 +141,7 @@ router.get(
             _id: req.body.user.id,
           },
           {
-            seq: newseq,
+            rewardseq: newseq,
           }
         );
         const Categoryindex = await Categories.findOne({
